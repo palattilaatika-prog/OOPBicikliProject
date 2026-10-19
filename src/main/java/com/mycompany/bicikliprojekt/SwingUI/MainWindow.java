@@ -27,12 +27,12 @@ public class MainWindow extends JFrame{
     private void createTabs(){
         tabbedPane = new JTabbedPane();
         
-        JPanel profilePanel = new JPanel();
+        JPanel profilePanel = new ProfilePanel();
         JPanel forSalePanel = new JPanel();
         JPanel stolenPanel = new JPanel();
         JPanel newsPanel = new JPanel();
 
-        profilePanel.add(new JLabel("Saját profil és kerékpárok"));
+
         forSalePanel.add(new JLabel("Eladó kerékpárok"));
         stolenPanel.add(new JLabel("Ellopott kerékpárok"));
         newsPanel.add(new JLabel("Kerékpáros hírek"));
