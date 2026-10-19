@@ -3,6 +3,8 @@
  */
 
 package com.mycompany.bicikliprojekt.main;
+import com.mycompany.bicikliprojekt.SwingUI.MainWindow;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -11,6 +13,9 @@ package com.mycompany.bicikliprojekt.main;
 public class Bicikliprojekt {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        SwingUtilities.invokeLater(() -> {
+            MainWindow window = new MainWindow();
+            window.setVisible(true);
+        });
     }
 }
