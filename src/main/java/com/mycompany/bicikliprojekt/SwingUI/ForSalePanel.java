@@ -5,6 +5,8 @@
 package com.mycompany.bicikliprojekt.SwingUI;
 
 import com.mycompany.bicikliprojekt.SwingUI.components.BikeIcon;
+import com.mycompany.bicikliprojekt.SwingUI.components.ScrollBar;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -39,7 +41,16 @@ public class ForSalePanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(cardsPanel);
         scrollPane.setBorder(null);
+
+        scrollPane.getVerticalScrollBar().setUI(
+                new ScrollBar()
+        );
+        scrollPane.getHorizontalScrollBar().setUI(
+                new ScrollBar()
+        );
+
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
 
         add(header, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
