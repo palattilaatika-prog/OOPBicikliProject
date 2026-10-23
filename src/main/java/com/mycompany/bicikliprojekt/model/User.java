@@ -15,13 +15,15 @@ public class User {
     private int id;
     private String name;
     private String email;
+    private String password;
     private List<Bike> bikes; 
     // The bikes of the user (list)
 
-    public User(int id, String name, String email) {
+    public User(int id, String name, String email,String password) {
         setUId(id);
         setUname(name);
         setEmail(email);
+        this.password = password;
         this.bikes = new ArrayList<>();
     }
 
@@ -65,6 +67,18 @@ public class User {
            }
         this.email = email.trim();
     }
+    
+    public void setPassword(String password) 
+    {
+        if(password==null||password.trim().isEmpty())
+            
+        {throw new IllegalArgumentException("Type cannot be empty or null.");}
+        if(password.length()<=8)
+        {throw new IllegalArgumentException("Password must be at least 8 characters ");}
+        this.password = password; 
+    }
+    
+    public String getPassword() { return password; }
     public int getUId(){return id;}
     public String getUname(){return name;}
     public String getEmail(){return email;}

@@ -18,17 +18,62 @@ import java.util.List;
  *
  * @author Denes
  */
-public class DataBaseManager {
-    //CRUD operations
+public class DataBaseManager implements AuthService{
     // inserts
-    public void insertUser(User user) {
-        String sql = "INSERT INTO users(name, email) VALUES(?, ?)";
+    @Override
+    public User authenticate(String email, String password) {
+        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+
+        try (Connection conn = DataBase.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, email);
+            pstmt.setString(2, password);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new User(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("email"),
+                            rs.getString("password")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error during authentication: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    @Override
+    public boolean register(User user) {
+        String sql = "INSERT INTO users(name, email, password) VALUES(?, ?, ?)";
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, user.getUname());
             pstmt.setString(2, user.getEmail());
+            pstmt.setString(3, user.getPassword());
+            
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error registering user: " + e.getMessage());
+            return false;
+        }
+    }
+    public void insertUser(User user) {
+        String sql = "INSERT INTO users(name, email, password) VALUES(?, ?, ?)";
+
+        try (Connection conn = DataBase.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, user.getUname());
+            pstmt.setString(2, user.getEmail());
+            pstmt.setString(3, user.getPassword()); // Jelszó mentése
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -208,29 +253,31 @@ public class DataBaseManager {
     }
   //finding a user
     public User getUserById(int userId) {
-        String sql = "SELECT * FROM users WHERE id = ?";
-        User user = null;
+    String sql = "SELECT * FROM users WHERE id = ?";
+    User user = null;
 
-        try (Connection conn = DataBase.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    try (Connection conn = DataBase.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setInt(1, userId);
-            ResultSet rs = pstmt.executeQuery();
+        pstmt.setInt(1, userId);
 
+        try (ResultSet rs = pstmt.executeQuery()) {
             if (rs.next()) {
                 user = new User(
                         rs.getInt("id"),
                         rs.getString("name"),
-                        rs.getString("email")
+                        rs.getString("email"),
+                        rs.getString("password")
                 );
             }
-
-        } catch (SQLException e) {
-            System.err.println("Error fetching user: " + e.getMessage());
         }
 
-        return user;
+    } catch (SQLException e) {
+        System.err.println("Error fetching user by ID: " + e.getMessage());
     }
+
+    return user;
+}
     // all users to list in UI
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
@@ -244,7 +291,8 @@ public class DataBaseManager {
                 User user = new User(
                         rs.getInt("id"),
                         rs.getString("name"),
-                        rs.getString("email")
+                        rs.getString("email"),
+                        rs.getString("password")
                 );
                 users.add(user);
             }
