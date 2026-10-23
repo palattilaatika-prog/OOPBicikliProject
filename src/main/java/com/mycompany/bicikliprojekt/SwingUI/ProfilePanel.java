@@ -16,6 +16,10 @@ import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import com.mycompany.bicikliprojekt.DataBase.DataBaseManager;
+import com.mycompany.bicikliprojekt.model.Bike;
+import com.mycompany.bicikliprojekt.model.User;
+import com.mycompany.bicikliprojekt.services.SessionManager;
 
 /**
  *
@@ -33,6 +37,7 @@ public class ProfilePanel extends JPanel {
     private static final Color DANGER_COLOR = new Color(195, 65, 65);
     private final JPanel cardsPanel;
     private final ArrayList<BikeItem> bikes = new ArrayList<>();
+    private final DataBaseManager databaseManager = new DataBaseManager();
     
     public ProfilePanel(){
         setLayout(new BorderLayout(24, 24));
@@ -92,17 +97,40 @@ public class ProfilePanel extends JPanel {
         
         addButton.addActionListener(e -> addBike());
         
-        //Temporary test datas
-        bikes.add(new BikeItem(
-                "Trek", "Marlin 5", "MTB", "BK001", null
-        ));
-
-        bikes.add(new BikeItem(
-                "Giant", "Escape 3", "Városi", "BK002", null
-        ));
-
+        loadBikesFromDatabase();
         refreshCards();
     }
+    
+    private void loadBikesFromDatabase() {
+    bikes.clear();
+
+    User currentUser = SessionManager.getCurrentUser();
+
+    if (currentUser == null) {
+        showError("Nincs bejelentkezett felhasználó!");
+        return;
+    }
+
+    System.out.println("Bejelentkezett felhasználó ID: "
+        + currentUser.getUId());
+
+    var databaseBikes = databaseManager.getBikesByUserId(
+            currentUser.getUId());
+
+    System.out.println("Betöltött kerékpárok száma: "
+            + databaseBikes.size());
+
+    for (Bike bike : databaseBikes) {
+        bikes.add(new BikeItem(
+                bike.getBicikliid(),
+                bike.getBrand(),
+                bike.getModel(),
+                bike.getType(),
+                bike.getSerialNumber(),
+                null
+        ));
+    }
+}
     
     private void refreshCards(){
         cardsPanel.removeAll();
@@ -117,65 +145,125 @@ public class ProfilePanel extends JPanel {
     
     
 
-private JPanel createBikeCard(BikeItem bike) {
-    return new com.mycompany.bicikliprojekt.SwingUI.components.BikeCard(
-            bike.brand,
-            bike.model,
-            bike.type,
-            bike.serialNumber,
-            bike.imagePath,
-            () -> editBike(bike),
-            () -> deleteBike(bike)
-    );
-}   
-     private void addBike() {
+    private JPanel createBikeCard(BikeItem bike) {
+        return new com.mycompany.bicikliprojekt.SwingUI.components.BikeCard(
+                bike.brand,
+                bike.model,
+                bike.type,
+                bike.serialNumber,
+                bike.imagePath,
+                () -> editBike(bike),
+                () -> deleteBike(bike)
+        );
+    }
+    private void addBike() {
         BikeItem bike = showBikeDialog(null);
 
-        if (bike != null) {
-            if (serialExists(bike.serialNumber, null)) {
-                showError("Ez a sorozatszám már szerepel a profilban!");
-                return;
-            }
-
-            bikes.add(bike);
-            refreshCards();
+        if (bike == null) {
+            return;
         }
+
+        if (serialExists(bike.serialNumber, null)) {
+            showError("Ez a sorozatszám már szerepel a profilban!");
+            return;
+        }
+
+        User currentUser = SessionManager.getCurrentUser();
+
+        if (currentUser == null) {
+            showError("Nincs bejelentkezett felhasználó!");
+            return;
+        }
+
+        Bike newBike = new Bike(
+                1,
+                currentUser.getUId(),
+                bike.brand,
+                bike.model,
+                bike.type,
+                bike.serialNumber
+        );
+
+        databaseManager.insertBicikli(newBike);
+
+        loadBikesFromDatabase();
+        refreshCards();
+
+        JOptionPane.showMessageDialog(
+                this,
+                "A kerékpár mentése megtörtént!",
+                "Siker",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 
+    
     private void editBike(BikeItem bike) {
         BikeItem edited = showBikeDialog(bike);
 
-        if (edited != null) {
-            if (serialExists(edited.serialNumber, bike)) {
-                showError("Ez a sorozatszám már egy másik kerékpáré!");
-                return;
-            }
-
-            bike.brand = edited.brand;
-            bike.model = edited.model;
-            bike.type = edited.type;
-            bike.serialNumber = edited.serialNumber;
-            bike.imagePath = edited.imagePath;
-
-            refreshCards();
+        if (edited == null) {
+            return;
         }
+
+        if (serialExists(edited.serialNumber, bike)) {
+            showError("Ez a sorozatszám már egy másik kerékpáré!");
+            return;
+        }
+
+        User currentUser = SessionManager.getCurrentUser();
+
+        if (currentUser == null) {
+            showError("Nincs bejelentkezett felhasználó!");
+            return;
+        }
+
+        Bike updatedBike = new Bike(
+            bike.id,
+            currentUser.getUId(),
+            edited.brand,
+            edited.model,
+            edited.type,
+            edited.serialNumber
+        );
+
+        databaseManager.updateBicikli(updatedBike);
+
+        bike.brand = edited.brand;
+        bike.model = edited.model;
+        bike.type = edited.type;
+        bike.serialNumber = edited.serialNumber;
+        bike.imagePath = edited.imagePath;
+
+        loadBikesFromDatabase();
+        refreshCards();
+
+        JOptionPane.showMessageDialog(
+            this,
+            "A kerékpár módosítása megtörtént!",
+            "Siker",
+            JOptionPane.INFORMATION_MESSAGE
+        );
     }
+
 
     private void deleteBike(BikeItem bike) {
         int answer = JOptionPane.showConfirmDialog(
-                this,
-                "Biztosan törlöd ezt a kerékpárt?\n"
-                        + bike.brand + " " + bike.model,
-                "Kerékpár törlése",
-                JOptionPane.YES_NO_OPTION
+            this,
+            "Biztosan törlöd ezt a kerékpárt?\n"
+                + bike.brand + " " + bike.model,
+            "Kerékpár törlése",
+            JOptionPane.YES_NO_OPTION
         );
 
-        if (answer == JOptionPane.YES_OPTION) {
-            bikes.remove(bike);
-            refreshCards();
+        if (answer != JOptionPane.YES_OPTION) {
+            return;
         }
-    }
 
+        databaseManager.deleteBikeById(bike.id);
+
+        loadBikesFromDatabase();
+        refreshCards();
+    }
     private BikeItem showBikeDialog(BikeItem existing) {
         JTextField brandField = new JTextField(
                 existing == null ? "" : existing.brand);
@@ -284,7 +372,13 @@ private JPanel createBikeCard(BikeItem bike) {
             }
 
             result[0] = new BikeItem(
-                    brand, model, type, serial, imagePath[0]);
+                    existing == null ? -1 : existing.id,
+                    brand,
+                    model,
+                    type,
+                    serial,
+                    imagePath[0]
+            );
             dialog.dispose();
         });
 
@@ -349,6 +443,7 @@ private JPanel createBikeCard(BikeItem bike) {
 
     private static class BikeItem {
 
+        private int id;
         private String brand;
         private String model;
         private String type;
@@ -356,19 +451,21 @@ private JPanel createBikeCard(BikeItem bike) {
         private String imagePath;
 
         private BikeItem(
+                int id,
                 String brand,
                 String model,
                 String type,
                 String serialNumber,
                 String imagePath) {
 
+            this.id = id;
             this.brand = brand;
             this.model = model;
             this.type = type;
             this.serialNumber = serialNumber;
             this.imagePath = imagePath;
-        }
     }
+}
 
     // Saját rajzolt ikon, így nem kell hozzá külön képfájl.
     private static class BikeIcon implements Icon {
