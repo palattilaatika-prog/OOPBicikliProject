@@ -17,29 +17,58 @@ import java.util.ArrayList;
  *
  * @author mcsab
  */
+
 public class ProfilePanel extends JPanel {
     
+    private static final Color BACKGROUND_COLOR = new Color(245, 247, 245);
+    private static final Color CARD_COLOR = Color.WHITE;
+    private static final Color PRIMARY_GREEN = new Color(35, 125, 85);
+    private static final Color DARK_TEXT = new Color(35, 45, 40);
+    private static final Color SECONDARY_TEXT = new Color(110, 120, 115);
+    private static final Color BORDER_COLOR = new Color(225, 230, 226);
+    private static final Color DANGER_COLOR = new Color(195, 65, 65);
     private final JPanel cardsPanel;
     private final ArrayList<BikeItem> bikes = new ArrayList<>();
     
     public ProfilePanel(){
-        setLayout(new BorderLayout(15,15));
-        setBorder(new EmptyBorder(20,20,20,20));
+        setLayout(new BorderLayout(24, 24));
+        setBackground(BACKGROUND_COLOR);
         
+        setBorder(new EmptyBorder(28, 32, 28, 32));
         JLabel title = new JLabel("Saját kerékpárjaim");
-        title.setFont(new Font("SansSerif", Font.BOLD, 24));
-        
+        title.setFont(new Font("SansSerif", Font.BOLD, 28));
+        title.setForeground(DARK_TEXT);
+
+        JLabel subtitle = new JLabel(
+                "Kezeld és tekintsd át a kerékpárjaidat"
+        );
+        subtitle.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        subtitle.setForeground(SECONDARY_TEXT);
+
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
+        titlePanel.setOpaque(false);
+
+        titlePanel.add(title);
+        titlePanel.add(Box.createVerticalStrut(6));
+        titlePanel.add(subtitle);
+
         JButton addButton = new JButton("+ Új kerékpár");
-        
-        JPanel header = new JPanel(new BorderLayout());
-        header.add(title, BorderLayout.WEST);
+        styleButton(addButton, PRIMARY_GREEN, Color.WHITE);
+
+        JPanel header = new JPanel(new BorderLayout(20, 0));
+        header.setOpaque(false);
+        header.add(titlePanel, BorderLayout.WEST);
         header.add(addButton, BorderLayout.EAST);
-        
-        cardsPanel = new JPanel(new GridLayout(0,2,15,15));
+        header.setBorder(new EmptyBorder(0, 0, 12, 0));
+        cardsPanel = new JPanel(new GridLayout(0, 2, 20, 20));
+        cardsPanel.setBackground(BACKGROUND_COLOR);
         cardsPanel.setBorder(new EmptyBorder(5,5,5,5));
         
         JScrollPane scrollPane = new JScrollPane(cardsPanel);
         scrollPane.setBorder(null);
+        scrollPane.getViewport().setBackground(BACKGROUND_COLOR);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         
         add(header, BorderLayout.NORTH);
@@ -58,6 +87,20 @@ public class ProfilePanel extends JPanel {
 
         refreshCards();
     }
+    private void styleButton(
+        JButton button,
+        Color background,
+        Color foreground) {
+
+        button.setFont(new Font("SansSerif", Font.BOLD, 13));
+        button.setBackground(background);
+        button.setForeground(foreground);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(new EmptyBorder(11, 17, 11, 17));
+}
     
     private void refreshCards(){
         cardsPanel.removeAll();
@@ -70,59 +113,77 @@ public class ProfilePanel extends JPanel {
         cardsPanel.repaint();
     }
     
-    private JPanel createBikeCard(BikeItem bike){
-        JPanel card = new JPanel(new BorderLayout(8, 8));
+    
+private JPanel createBikeCard(BikeItem bike) {
+    RoundedPanel card = new RoundedPanel(18);
+    card.setLayout(new BorderLayout(0, 0));
+    card.setBackground(CARD_COLOR);
+    card.setBorder(
+        javax.swing.BorderFactory.createEmptyBorder(10, 10, 12, 10)
+        );
 
-        card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(
-                        new Color(220, 220, 220)
-                ),
-                new EmptyBorder(10, 10, 10, 10)
-        ));
+    // Bike image area
+        JPanel imageContainer = new JPanel(new BorderLayout());
+        imageContainer.setBackground(new Color(237, 242, 238));
+        imageContainer.setPreferredSize(new Dimension(300, 190));
 
         JLabel imageLabel = new JLabel();
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        imageLabel.setPreferredSize(new Dimension(220, 150));
+        imageLabel.setPreferredSize(new Dimension(300, 190));
 
-        if (bike.imagePath != null
-                && new File(bike.imagePath).isFile()) {
+    if (bike.imagePath != null
+            && new File(bike.imagePath).isFile()) {
 
-            ImageIcon original = new ImageIcon(bike.imagePath);
+        ImageIcon original = new ImageIcon(bike.imagePath);
+        Image scaled = original.getImage().getScaledInstance(
+                300, 190, Image.SCALE_SMOOTH
+        );
+        imageLabel.setIcon(new ImageIcon(scaled));
+    } else {
+        imageLabel.setIcon(new BikeIcon(180, 125));
+    }
 
-            Image scaled = original.getImage().getScaledInstance(
-                    220, 150, Image.SCALE_SMOOTH
-            );
+    imageContainer.add(imageLabel, BorderLayout.CENTER);
 
-            imageLabel.setIcon(new ImageIcon(scaled));
-
-        } else {
-            imageLabel.setIcon(new BikeIcon(100, 100));
-        }
-
+    // Bike details
         JPanel details = new JPanel();
-        details.setOpaque(false);
+        details.setBackground(CARD_COLOR);
         details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
+        details.setBorder(new EmptyBorder(18, 18, 12, 18));
 
         JLabel name = new JLabel(bike.brand + " " + bike.model);
-        name.setFont(new Font("SansSerif", Font.BOLD, 17));
+        name.setFont(new Font("SansSerif", Font.BOLD, 20));
+        name.setForeground(DARK_TEXT);
+        name.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel type = new JLabel("Típus: " + bike.type);
+        JLabel type = new JLabel(bike.type);
+        type.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        type.setForeground(PRIMARY_GREEN);
+        type.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         JLabel serial = new JLabel("Sorozatszám: " + bike.serialNumber);
+        serial.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        serial.setForeground(SECONDARY_TEXT);
+        serial.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         details.add(name);
-        details.add(Box.createVerticalStrut(8));
+        details.add(Box.createVerticalStrut(7));
         details.add(type);
-        details.add(Box.createVerticalStrut(4));
+        details.add(Box.createVerticalStrut(12));
         details.add(serial);
 
+        // Action buttons
         JPanel buttons = new JPanel(
-                new FlowLayout(FlowLayout.RIGHT, 5, 0)
+                new FlowLayout(FlowLayout.RIGHT, 8, 0)
         );
-        buttons.setOpaque(false);
+        buttons.setBackground(CARD_COLOR);
+        buttons.setBorder(new EmptyBorder(0, 12, 0, 12));
 
         JButton editButton = new JButton("Módosítás");
         JButton deleteButton = new JButton("Törlés");
+
+        styleButton(editButton, new Color(235, 241, 237), PRIMARY_GREEN);
+        styleButton(deleteButton, new Color(250, 235, 235), DANGER_COLOR);
 
         editButton.addActionListener(e -> editBike(bike));
         deleteButton.addActionListener(e -> deleteBike(bike));
@@ -130,12 +191,13 @@ public class ProfilePanel extends JPanel {
         buttons.add(editButton);
         buttons.add(deleteButton);
 
-        card.add(imageLabel, BorderLayout.NORTH);
+        card.add(imageContainer, BorderLayout.NORTH);
         card.add(details, BorderLayout.CENTER);
         card.add(buttons, BorderLayout.SOUTH);
 
         return card;
-    }
+}
+
     
      private void addBike() {
         BikeItem bike = showBikeDialog(null);
