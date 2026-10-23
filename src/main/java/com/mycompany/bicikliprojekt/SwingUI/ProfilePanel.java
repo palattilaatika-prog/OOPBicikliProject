@@ -6,6 +6,7 @@ package com.mycompany.bicikliprojekt.SwingUI;
 
 import com.mycompany.bicikliprojekt.SwingUI.components.StyledButton;
 import com.mycompany.bicikliprojekt.SwingUI.components.RoundedPanel;
+import com.mycompany.bicikliprojekt.SwingUI.components.ScrollBar;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -72,9 +73,18 @@ public class ProfilePanel extends JPanel {
         cardsPanel.setBorder(new EmptyBorder(5,5,5,5));
         
         JScrollPane scrollPane = new JScrollPane(cardsPanel);
+
         scrollPane.setBorder(null);
         scrollPane.getViewport().setBackground(BACKGROUND_COLOR);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        scrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+
+        scrollPane.getVerticalScrollBar().setUI(
+                new com.mycompany.bicikliprojekt.SwingUI.components.ScrollBar()
+        );
+
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         
         add(header, BorderLayout.NORTH);

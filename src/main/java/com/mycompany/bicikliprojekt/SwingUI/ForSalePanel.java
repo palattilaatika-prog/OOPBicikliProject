@@ -5,6 +5,9 @@
 package com.mycompany.bicikliprojekt.SwingUI;
 
 import com.mycompany.bicikliprojekt.SwingUI.components.BikeIcon;
+import com.mycompany.bicikliprojekt.SwingUI.components.ScrollBar;
+import com.mycompany.bicikliprojekt.SwingUI.components.StyledButton;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -28,18 +31,31 @@ public class ForSalePanel extends JPanel {
         JLabel title = new JLabel("Eladó kerékpárok");
         title.setFont(new Font("SansSerif", Font.BOLD, 24));
 
-        JButton addButton = new JButton("+ Kerékpár hozzáadása");
+        JButton addButton = new StyledButton(
+        "+ Kerékpár hozzáadása",
+        new Color(35, 125, 85),
+        Color.WHITE
+        );
 
         JPanel header = new JPanel(new BorderLayout());
         header.add(title, BorderLayout.WEST);
         header.add(addButton, BorderLayout.EAST);
 
-        cardsPanel = new JPanel(new GridLayout(0, 3, 15, 15));
+        cardsPanel = new JPanel(new GridLayout(0, 2, 20, 20));
         cardsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         JScrollPane scrollPane = new JScrollPane(cardsPanel);
         scrollPane.setBorder(null);
+
+        scrollPane.getVerticalScrollBar().setUI(
+                new ScrollBar()
+        );
+        scrollPane.getHorizontalScrollBar().setUI(
+                new ScrollBar()
+        );
+
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
 
         add(header, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
@@ -162,8 +178,17 @@ public class ForSalePanel extends JPanel {
         );
         buttons.setOpaque(false);
 
-        JButton editButton = new JButton("Módosítás");
-        JButton deleteButton = new JButton("Törlés");
+        JButton editButton = new StyledButton(
+        "Módosítás",
+        new Color(235, 242, 237),
+        new Color(35, 125, 85)
+        );
+
+        JButton deleteButton = new StyledButton(
+        "Törlés",
+        new Color(250, 235, 235),
+        new Color(200, 55, 55)
+        );
 
         editButton.addActionListener(e -> editBike(bike));
         deleteButton.addActionListener(e -> deleteBike(bike));
