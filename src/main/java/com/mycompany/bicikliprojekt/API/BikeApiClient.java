@@ -46,8 +46,8 @@ public class BikeApiClient {
                     for (BikeApiItem item : response.getBikes()) {
                         
                         int id = item.getId();
-                        String brand = item.getManufacturerName() != null ? item.getManufacturerName() : "Ismeretlen";
-                        String model = item.getFrameModel() != null ? item.getFrameModel() : "Ismeretlen";
+                        String brand = item.getManufacturerName() != null ? item.getManufacturerName() : "UNKNOWN";
+                        String model = item.getFrameModel() != null ? item.getFrameModel() : "UNKNOWN";
                         String serialNumber = item.getSerial() != null ? item.getSerial() : "UNKNOWN";
 
                         // serial number validation
@@ -56,7 +56,7 @@ public class BikeApiClient {
                         }
 
                         // converting date
-                        String reportedDate = "Ismeretlen";
+                        String reportedDate = "UNKNOWN";
                         if (item.getDateStolen() != null && item.getDateStolen() > 0) {
                             reportedDate = Instant.ofEpochSecond(item.getDateStolen())
                                     .atZone(ZoneId.systemDefault())
@@ -82,7 +82,7 @@ public class BikeApiClient {
             conn.disconnect();
 
         } catch (Exception e) {
-            System.err.println("Hiba az API lekérdezése közben: " + e.getMessage());
+            System.err.println("Error while processing api: " + e.getMessage());
         }
 
         return stolenBikes;
