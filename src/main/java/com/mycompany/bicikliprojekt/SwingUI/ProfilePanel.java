@@ -4,6 +4,9 @@
  */
 package com.mycompany.bicikliprojekt.SwingUI;
 
+import com.mycompany.bicikliprojekt.SwingUI.components.StyledButton;
+import com.mycompany.bicikliprojekt.SwingUI.components.RoundedPanel;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -53,8 +56,11 @@ public class ProfilePanel extends JPanel {
         titlePanel.add(Box.createVerticalStrut(6));
         titlePanel.add(subtitle);
 
-        JButton addButton = new JButton("+ Új kerékpár");
-        styleButton(addButton, PRIMARY_GREEN, Color.WHITE);
+        JButton addButton = new StyledButton(
+        "+ Új kerékpár",
+        PRIMARY_GREEN,
+        Color.WHITE
+        );
 
         JPanel header = new JPanel(new BorderLayout(20, 0));
         header.setOpaque(false);
@@ -87,20 +93,6 @@ public class ProfilePanel extends JPanel {
 
         refreshCards();
     }
-    private void styleButton(
-        JButton button,
-        Color background,
-        Color foreground) {
-
-        button.setFont(new Font("SansSerif", Font.BOLD, 13));
-        button.setBackground(background);
-        button.setForeground(foreground);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setOpaque(true);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setBorder(new EmptyBorder(11, 17, 11, 17));
-}
     
     private void refreshCards(){
         cardsPanel.removeAll();
@@ -179,11 +171,18 @@ private JPanel createBikeCard(BikeItem bike) {
         buttons.setBackground(CARD_COLOR);
         buttons.setBorder(new EmptyBorder(0, 12, 0, 12));
 
-        JButton editButton = new JButton("Módosítás");
-        JButton deleteButton = new JButton("Törlés");
+        JButton editButton = new StyledButton(
+        "Módosítás",
+        new Color(235, 241, 237),
+        PRIMARY_GREEN
+        );
 
-        styleButton(editButton, new Color(235, 241, 237), PRIMARY_GREEN);
-        styleButton(deleteButton, new Color(250, 235, 235), DANGER_COLOR);
+        JButton deleteButton = new StyledButton(
+        "Törlés",
+        new Color(250, 235, 235),
+        DANGER_COLOR
+        );
+
 
         editButton.addActionListener(e -> editBike(bike));
         deleteButton.addActionListener(e -> deleteBike(bike));
