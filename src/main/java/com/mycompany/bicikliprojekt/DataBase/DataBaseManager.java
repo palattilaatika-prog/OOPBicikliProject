@@ -7,6 +7,7 @@ import com.mycompany.bicikliprojekt.model.Bike;
 import com.mycompany.bicikliprojekt.model.ForSaleBike;
 import com.mycompany.bicikliprojekt.model.StolenBike;
 import com.mycompany.bicikliprojekt.model.User;
+import com.mycompany.bicikliprojekt.services.PasswordHash;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,15 +21,19 @@ import java.util.List;
  */
 public class DataBaseManager implements AuthService{
     // inserts
+
+    //AuthService implementation (SHA-256)
+
     @Override
     public User authenticate(String email, String password) {
         String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+        String hashedPassword = PasswordHash.hashPassword(password);
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, email);
-            pstmt.setString(2, password);
+            pstmt.setString(2, hashedPassword);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -56,8 +61,8 @@ public class DataBaseManager implements AuthService{
 
             pstmt.setString(1, user.getUname());
             pstmt.setString(2, user.getEmail());
-            pstmt.setString(3, user.getPassword());
-            
+            pstmt.setString(3, PasswordHash.hashPassword(user.getPassword()));
+
             return pstmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
@@ -66,19 +71,8 @@ public class DataBaseManager implements AuthService{
         }
     }
     public void insertUser(User user) {
-        String sql = "INSERT INTO users(name, email, password) VALUES(?, ?, ?)";
-
-        try (Connection conn = DataBase.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, user.getUname());
-            pstmt.setString(2, user.getEmail());
-            pstmt.setString(3, user.getPassword()); // Jelszó mentése
-            pstmt.executeUpdate();
-
-        } catch (SQLException e) {
-            System.err.println("Error inserting user: " + e.getMessage());
-        }
+        //insert and register did the same thing, redirect in case it was called in the UI
+        register(user);
     }
 
     public void insertBicikli(Bike bike) {
@@ -432,14 +426,16 @@ public class DataBaseManager implements AuthService{
         }
     }
     public void updateUser(User user) {
-        String sql = "UPDATE users SET name = ?, email = ? WHERE id = ?";
+        String sql = "UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?";
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, user.getUname());
             pstmt.setString(2, user.getEmail());
-            pstmt.setInt(3, user.getUId());
+            // before updateing we hash the password
+            pstmt.setString(3, PasswordHash.hashPassword(user.getPassword()));
+            pstmt.setInt(4, user.getUId());
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
