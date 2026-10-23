@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.mycompany.bicikliprojekt.DataBase.DataBase;
 import com.mycompany.bicikliprojekt.SwingUI.components.ContentPanel;
 import com.mycompany.bicikliprojekt.SwingUI.components.SidebarPanel;
 /*
@@ -23,6 +24,8 @@ public class MainWindow extends JFrame{
     private final SidebarPanel sidebarPanel;
 
     public MainWindow() {
+        DataBase.createTables();
+        
         setTitle("Bike Manager");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1200, 750);
@@ -52,6 +55,14 @@ public class MainWindow extends JFrame{
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainWindow().setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+        LoginDialog loginDialog = new LoginDialog(null);
+
+        if (loginDialog.showDialog()) {
+            new MainWindow().setVisible(true);
+        } else {
+            System.exit(0);
+        }
+        });
     }
 }
