@@ -178,102 +178,154 @@ private JPanel createBikeCard(BikeItem bike) {
 
     private BikeItem showBikeDialog(BikeItem existing) {
         JTextField brandField = new JTextField(
-                existing == null ? "" : existing.brand
-        );
-
+                existing == null ? "" : existing.brand);
         JTextField modelField = new JTextField(
-                existing == null ? "" : existing.model
-        );
-
+                existing == null ? "" : existing.model);
         JTextField typeField = new JTextField(
-                existing == null ? "" : existing.type
-        );
-
+                existing == null ? "" : existing.type);
         JTextField serialField = new JTextField(
-                existing == null ? "" : existing.serialNumber
-        );
+                existing == null ? "" : existing.serialNumber);
 
-        String[] selectedImage = {
+        String[] imagePath = {
             existing == null ? null : existing.imagePath
         };
 
-        JLabel imageStatus = new JLabel(
-                selectedImage[0] == null
-                        ? "Alapértelmezett kerékpárikon"
-                        : new File(selectedImage[0]).getName()
-        );
+        JLabel imageLabel = new JLabel(
+                imagePath[0] == null
+                        ? "Nincs kiválasztott kép"
+                        : new File(imagePath[0]).getName());
+        
+        imageLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        imageLabel.setForeground(SECONDARY_TEXT);
 
-        JButton chooseImageButton = new JButton("Kép kiválasztása");
-        JButton removeImageButton = new JButton("Alapértelmezett ikon");
+        JButton chooseButton = new StyledButton(
+                "Kép kiválasztása", PRIMARY_GREEN, Color.WHITE);
+        JButton defaultButton = new StyledButton(
+                "Alapértelmezett ikon",
+                new Color(235, 243, 238), PRIMARY_GREEN);
 
-        chooseImageButton.addActionListener(e -> {
+        chooseButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
-
-            chooser.setDialogTitle("Kerékpár képének kiválasztása");
-            chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-                    "Képfájlok (JPG, PNG, GIF)",
-                    "jpg", "jpeg", "png", "gif"
-            ));
+            chooser.setFileFilter(
+                    new javax.swing.filechooser.FileNameExtensionFilter(
+                            "Képfájlok", "jpg", "jpeg", "png", "gif"));
 
             if (chooser.showOpenDialog(this)
                     == JFileChooser.APPROVE_OPTION) {
-
-                selectedImage[0] =
-                        chooser.getSelectedFile().getAbsolutePath();
-
-                imageStatus.setText(chooser.getSelectedFile().getName());
+                File file = chooser.getSelectedFile();
+                imagePath[0] = file.getAbsolutePath();
+                imageLabel.setText(file.getName());
             }
         });
 
-        removeImageButton.addActionListener(e -> {
-            selectedImage[0] = null;
-            imageStatus.setText("Alapértelmezett kerékpárikon");
+        defaultButton.addActionListener(e -> {
+            imagePath[0] = null;
+            imageLabel.setText("Nincs kiválasztott kép");
         });
 
-        JPanel imagePanel = new JPanel();
-        imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.Y_AXIS));
-        imagePanel.add(chooseImageButton);
-        imagePanel.add(Box.createVerticalStrut(5));
-        imagePanel.add(removeImageButton);
-        imagePanel.add(Box.createVerticalStrut(5));
-        imagePanel.add(imageStatus);
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(new Color(238, 240, 238));
+        panel.setBorder(new EmptyBorder(16, 12, 12, 12));
+        addField(panel, "Márka:", brandField);
+        addField(panel, "Modell:", modelField);
+        addField(panel, "Típus:", typeField);
+        addField(panel, "Sorozatszám:", serialField);
 
-        Object[] fields = {
-            "Márka:", brandField,
-            "Modell:", modelField,
-            "Típus:", typeField,
-            "Sorozatszám:", serialField,
-            "Kerékpár képe:", imagePanel
-        };
+        JLabel imageTitle = new JLabel("Kerékpár képe:");
+        imageTitle.setFont(new Font("SansSerif", Font.BOLD, 13));
+        imageTitle.setForeground(DARK_TEXT);
 
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                fields,
+        panel.add(imageTitle);
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(chooseButton);
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(defaultButton);
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(imageLabel);
+
+        JButton saveButton = new StyledButton(
+                "Mentés", PRIMARY_GREEN, Color.WHITE);
+        JButton cancelButton = new StyledButton(
+                "Mégse", new Color(235, 243, 238), PRIMARY_GREEN);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttons.setBackground(CARD_COLOR);
+        buttons.add(cancelButton);
+        buttons.add(saveButton);
+
+        JPanel content = new JPanel(new BorderLayout());
+        content.setBackground(CARD_COLOR);
+        content.add(panel, BorderLayout.CENTER);
+        content.add(buttons, BorderLayout.SOUTH);
+
+        JDialog dialog = new JDialog(
+                SwingUtilities.getWindowAncestor(this),
                 existing == null
                         ? "Új kerékpár hozzáadása"
                         : "Kerékpár módosítása",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-        );
+                Dialog.ModalityType.APPLICATION_MODAL);
 
-        if (result != JOptionPane.OK_OPTION) {
-            return null;
-        }
+        dialog.setContentPane(content);
+        dialog.getRootPane().setBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR));
 
-        String brand = brandField.getText().trim();
-        String model = modelField.getText().trim();
-        String type = typeField.getText().trim();
-        String serial = serialField.getText().trim();
+        BikeItem[] result = {null};
 
-        if (brand.isEmpty() || serial.isEmpty()) {
-            showError("A márka és a sorozatszám megadása kötelező!");
-            return null;
-        }
+        saveButton.addActionListener(e -> {
+            String brand = brandField.getText().trim();
+            String model = modelField.getText().trim();
+            String type = typeField.getText().trim();
+            String serial = serialField.getText().trim();
 
-        return new BikeItem(
-                brand, model, type, serial, selectedImage[0]
-        );
+            if (brand.isEmpty() || serial.isEmpty()) {
+                showError("A márka és a sorozatszám megadása kötelező!");
+                return;
+            }
+
+            result[0] = new BikeItem(
+                    brand, model, type, serial, imagePath[0]);
+            dialog.dispose();
+        });
+
+        cancelButton.addActionListener(e -> dialog.dispose());
+
+        dialog.pack();
+        dialog.setMinimumSize(new Dimension(350, 0));
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+
+        return result[0];
     }
+
+    
+    private void addField(
+        JPanel panel, String label, JTextField field) {
+
+        JLabel fieldLabel = new JLabel(label);
+        fieldLabel.setFont(new Font("SansSerif", Font.BOLD, 13));
+        fieldLabel.setForeground(DARK_TEXT);
+
+        panel.add(fieldLabel);
+        panel.add(Box.createVerticalStrut(5));
+
+        field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setForeground(DARK_TEXT);
+        field.setBackground(Color.WHITE);
+        field.setCaretColor(PRIMARY_GREEN);
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(
+                        new Color(215, 224, 218)),
+                new EmptyBorder(5, 7, 5, 7)
+        ));
+        field.setPreferredSize(new Dimension(300, 34));
+        field.setMaximumSize(
+                new Dimension(Integer.MAX_VALUE, 34));
+
+        panel.add(field);
+        panel.add(Box.createVerticalStrut(10));
+    }
+
 
     private boolean serialExists(String serial, BikeItem excluded) {
         for (BikeItem bike : bikes) {
