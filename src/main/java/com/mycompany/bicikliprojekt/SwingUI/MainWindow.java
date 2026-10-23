@@ -27,17 +27,15 @@ public class MainWindow extends JFrame{
     private void createTabs(){
         tabbedPane = new JTabbedPane();
         
-        JPanel profilePanel = new ProfilePanel();
-        JPanel forSalePanel = new JPanel();
+        
+        JPanel forSalePanel = new ForSalePanel();
         JPanel stolenPanel = new JPanel();
         JPanel newsPanel = new JPanel();
-
-
-        forSalePanel.add(new JLabel("Eladó kerékpárok"));
+        
         stolenPanel.add(new JLabel("Ellopott kerékpárok"));
         newsPanel.add(new JLabel("Kerékpáros hírek"));
 
-        tabbedPane.addTab("Profil", profilePanel);
+        tabbedPane.addTab("Profil", new ProfilePanel());
         tabbedPane.addTab("Eladó kerékpárok", forSalePanel);
         tabbedPane.addTab("Ellopott kerékpárok", stolenPanel);
         tabbedPane.addTab("Hírek", newsPanel);
