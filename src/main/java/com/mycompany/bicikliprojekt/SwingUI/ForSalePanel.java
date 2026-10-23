@@ -261,6 +261,14 @@ public class ForSalePanel extends JPanel {
 
         JComboBox<String> conditionBox =
                 new JComboBox<>(conditions);
+        
+        conditionBox.setBackground(Color.WHITE);
+        conditionBox.setForeground(new Color(35, 50, 60));
+        conditionBox.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        conditionBox.setFocusable(false);
+        conditionBox.setBorder(
+                BorderFactory.createLineBorder(new Color(215, 225, 219))
+        );
 
         JTextField priceField = new JTextField(
                 existing == null ? "" : String.valueOf(existing.price)
@@ -278,9 +286,18 @@ public class ForSalePanel extends JPanel {
                         ? "Alapértelmezett kerékpárikon"
                         : new File(selectedImage[0]).getName()
         );
+        
+        JButton chooseImageButton = new StyledButton(
+                "Kép kiválasztása",
+                new Color(35, 125, 85),
+                Color.WHITE
+        );
 
-        JButton chooseImageButton = new JButton("Kép kiválasztása");
-        JButton removeImageButton = new JButton("Alapértelmezett ikon");
+        JButton removeImageButton = new StyledButton(
+                "Alapértelmezett ikon",
+                new Color(235, 242, 237),
+                new Color(35, 125, 85)
+        );
 
         chooseImageButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
@@ -314,15 +331,42 @@ public class ForSalePanel extends JPanel {
         imagePanel.setLayout(
                 new BoxLayout(imagePanel, BoxLayout.Y_AXIS)
         );
+        imagePanel.setOpaque(false);
 
         imagePanel.add(chooseImageButton);
+        imagePanel.add(Box.createVerticalStrut(8));
         imagePanel.add(removeImageButton);
+        imagePanel.add(Box.createVerticalStrut(8));
+
+        imageStatus.setForeground(new Color(105, 120, 128));
         imagePanel.add(imageStatus);
 
         if (existing != null) {
             conditionBox.setSelectedItem(existing.condition);
         }
+        
+        Color fieldBorderColor = new Color(215, 225, 219);
+        
+        JTextField[] textFields = {
+        brandField,
+        modelField,
+        typeField,
+        priceField
+        };
 
+    for (JTextField field : textFields) {
+        field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(fieldBorderColor),
+                BorderFactory.createEmptyBorder(6, 8, 6, 8)
+        ));
+    }
+
+    conditionBox.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+    descriptionArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
+    descriptionArea.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
+        
         Object[] fields = {
             "Márka:", brandField,
             "Modell:", modelField,
@@ -333,17 +377,60 @@ public class ForSalePanel extends JPanel {
             "Kép:", imagePanel
         };
 
-        int result = JOptionPane.showConfirmDialog(
-                this,
+        JOptionPane optionPane = new JOptionPane(
                 fields,
-                existing == null
-                        ? "Új hirdetés"
-                        : "Hirdetés módosítása",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
+                JOptionPane.PLAIN_MESSAGE,
+                JOptionPane.DEFAULT_OPTION
         );
 
-        if (result != JOptionPane.OK_OPTION) {
+        optionPane.setOptions(new Object[]{});
+        optionPane.setInitialValue(null);
+
+        JDialog dialog = optionPane.createDialog(
+                this,
+                existing == null ? "Új hirdetés" : "Hirdetés módosítása"
+        );
+
+        JButton saveButton = new StyledButton(
+                "Mentés",
+                new Color(35, 125, 85),
+                Color.WHITE
+        );
+
+        JButton cancelButton = new StyledButton(
+                "Mégse",
+                new Color(235, 242, 237),
+                new Color(35, 125, 85)
+        );
+
+        final boolean[] saved = {false};
+
+        saveButton.addActionListener(e -> {
+            saved[0] = true;
+            dialog.dispose();
+        });
+
+        cancelButton.addActionListener(e -> dialog.dispose());
+
+        JPanel buttonPanel = new JPanel(
+                new FlowLayout(FlowLayout.RIGHT, 8, 8)
+        );
+        buttonPanel.setOpaque(false);
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(saveButton);
+
+        JPanel dialogContent = new JPanel(new BorderLayout(0, 12));
+        dialogContent.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        dialogContent.setBackground(new Color(248, 250, 249));
+        dialogContent.add(optionPane, BorderLayout.CENTER);
+        dialogContent.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.setContentPane(dialogContent);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+
+        if (!saved[0]) {
             return null;
         }
 
