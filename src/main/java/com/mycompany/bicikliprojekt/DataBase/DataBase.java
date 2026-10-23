@@ -30,14 +30,15 @@ public class DataBase {
                 + ");";
 
         String createBikesTable = "CREATE TABLE IF NOT EXISTS bikes ("
-                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "userId INTEGER NOT NULL, "
-                + "brand TEXT NOT NULL, "
-                + "model TEXT NOT NULL, "
-                + "type TEXT NOT NULL, "
-                + "serialNumber TEXT NOT NULL UNIQUE, "
-                + "FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE"
-                + ");";
+        + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        + "userId INTEGER NOT NULL, "
+        + "brand TEXT NOT NULL, "
+        + "model TEXT NOT NULL, "
+        + "type TEXT NOT NULL, "
+        + "serialNumber TEXT NOT NULL, "
+        + "FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE, "
+        + "UNIQUE (userId, serialNumber)"
+        + ");";
 
         String createForSaleBikesTable = "CREATE TABLE IF NOT EXISTS for_sale_bikes ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "

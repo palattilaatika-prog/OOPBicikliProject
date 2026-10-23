@@ -5,11 +5,9 @@
 package com.mycompany.bicikliprojekt.API;
 import com.google.gson.Gson;
 import com.mycompany.bicikliprojekt.model.StolenBike;
+import com.mycompany.bicikliprojekt.API.httphelper.HttpHandler;
+import com.mycompany.bicikliprojekt.API.httphelper.HttpResponse;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -21,68 +19,58 @@ import java.util.List;
  * @author Denes
  */
 public class BikeApiClient {
-    private static final String API_URL = "https://bikeindex.org/api/v3/search?stolenness=stolen&per_page=10";
+   private static final String API_URL = "https://bikeindex.org/api/v3/search?stolenness=stolen&per_page=10";
 
     public static List<StolenBike> fetchStolenBikesFromApi() {
         List<StolenBike> stolenBikes = new ArrayList<>();
 
+        HttpResponse response = HttpHandler.executeGetRequest(API_URL);
+
+        if (!response.isSuccess() || response.getBody() == null) {
+            System.err.println("Hiba az API kérés során. HTTP Kód: " + response.getStatusCode());
+            return stolenBikes;
+        }
+
         try {
-            URL url = new URL(API_URL);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Accept", "application/json");
+            // json processing
+            Gson gson = new Gson();
+            BikeApiResponse apiResponse = gson.fromJson(response.getBody(), BikeApiResponse.class);
 
-            if (conn.getResponseCode() != 200) {
-                System.err.println("HTTP Hiba: " + conn.getResponseCode());
-                return stolenBikes;
-            }
+            if (apiResponse != null && apiResponse.getBikes() != null) {
+                for (BikeApiItem item : apiResponse.getBikes()) {
 
-            // Reading json
-            try (Reader reader = new InputStreamReader(conn.getInputStream())) {
-                Gson gson = new Gson();
-                BikeApiResponse response = gson.fromJson(reader, BikeApiResponse.class);
+                    int id = item.getId();
+                    String brand = item.getManufacturerName() != null ? item.getManufacturerName() : "UNKNOWN";
+                    String model = item.getFrameModel() != null ? item.getFrameModel() : "UNKNOWN";
+                    String serialNumber = item.getSerial() != null ? item.getSerial() : "UNKNOWN";
 
-                if (response != null && response.getBikes() != null) {
-                    for (BikeApiItem item : response.getBikes()) {
-                        
-                        int id = item.getId();
-                        String brand = item.getManufacturerName() != null ? item.getManufacturerName() : "UNKNOWN";
-                        String model = item.getFrameModel() != null ? item.getFrameModel() : "UNKNOWN";
-                        String serialNumber = item.getSerial() != null ? item.getSerial() : "UNKNOWN";
-
-                        // serial number validation
-                        if (!serialNumber.matches("^[a-zA-Z0-9]+$")) {
-                            serialNumber = "NO" + id + "SERIAL";
-                        }
-
-                        // converting date
-                        String reportedDate = "UNKNOWN";
-                        if (item.getDateStolen() != null && item.getDateStolen() > 0) {
-                            reportedDate = Instant.ofEpochSecond(item.getDateStolen())
-                                    .atZone(ZoneId.systemDefault())
-                                    .toLocalDate()
-                                    .format(DateTimeFormatter.ISO_LOCAL_DATE);
-                        }
-
-                        // creating new StolenBikes
-                        StolenBike stolenBike = new StolenBike(
-                                id,
-                                brand,
-                                model,
-                                serialNumber,
-                                reportedDate,
-                                "API"
-                        );
-
-                        stolenBikes.add(stolenBike);
+                    // validation
+                    if (!serialNumber.matches("^[a-zA-Z0-9]+$")) {
+                        serialNumber = "NO" + id + "SERIAL";
                     }
+
+                    // converting date
+                    String reportedDate = "UNKNOWN";
+                    if (item.getDateStolen() != null && item.getDateStolen() > 0) {
+                        reportedDate = Instant.ofEpochSecond(item.getDateStolen())
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                                .format(DateTimeFormatter.ISO_LOCAL_DATE);
+                    }
+                    StolenBike stolenBike = new StolenBike(
+                            id,
+                            brand,
+                            model,
+                            serialNumber,
+                            reportedDate,
+                            "API"
+                    );
+
+                    stolenBikes.add(stolenBike);
                 }
             }
-
-            conn.disconnect();
-
         } catch (Exception e) {
-            System.err.println("Error while processing api: " + e.getMessage());
+            System.err.println("Error processing api: " + e.getMessage());
         }
 
         return stolenBikes;
