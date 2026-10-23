@@ -106,98 +106,18 @@ public class ProfilePanel extends JPanel {
     }
     
     
+
 private JPanel createBikeCard(BikeItem bike) {
-    RoundedPanel card = new RoundedPanel(18);
-    card.setLayout(new BorderLayout(0, 0));
-    card.setBackground(CARD_COLOR);
-    card.setBorder(
-        javax.swing.BorderFactory.createEmptyBorder(10, 10, 12, 10)
-        );
-
-    // Bike image area
-        JPanel imageContainer = new JPanel(new BorderLayout());
-        imageContainer.setBackground(new Color(237, 242, 238));
-        imageContainer.setPreferredSize(new Dimension(300, 190));
-
-        JLabel imageLabel = new JLabel();
-        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        imageLabel.setPreferredSize(new Dimension(300, 190));
-
-    if (bike.imagePath != null
-            && new File(bike.imagePath).isFile()) {
-
-        ImageIcon original = new ImageIcon(bike.imagePath);
-        Image scaled = original.getImage().getScaledInstance(
-                300, 190, Image.SCALE_SMOOTH
-        );
-        imageLabel.setIcon(new ImageIcon(scaled));
-    } else {
-        imageLabel.setIcon(new BikeIcon(180, 125));
-    }
-
-    imageContainer.add(imageLabel, BorderLayout.CENTER);
-
-    // Bike details
-        JPanel details = new JPanel();
-        details.setBackground(CARD_COLOR);
-        details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
-        details.setBorder(new EmptyBorder(18, 18, 12, 18));
-
-        JLabel name = new JLabel(bike.brand + " " + bike.model);
-        name.setFont(new Font("SansSerif", Font.BOLD, 20));
-        name.setForeground(DARK_TEXT);
-        name.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel type = new JLabel(bike.type);
-        type.setFont(new Font("SansSerif", Font.PLAIN, 13));
-        type.setForeground(PRIMARY_GREEN);
-        type.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel serial = new JLabel("Sorozatszám: " + bike.serialNumber);
-        serial.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        serial.setForeground(SECONDARY_TEXT);
-        serial.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        details.add(name);
-        details.add(Box.createVerticalStrut(7));
-        details.add(type);
-        details.add(Box.createVerticalStrut(12));
-        details.add(serial);
-
-        // Action buttons
-        JPanel buttons = new JPanel(
-                new FlowLayout(FlowLayout.RIGHT, 8, 0)
-        );
-        buttons.setBackground(CARD_COLOR);
-        buttons.setBorder(new EmptyBorder(0, 12, 0, 12));
-
-        JButton editButton = new StyledButton(
-        "Módosítás",
-        new Color(235, 241, 237),
-        PRIMARY_GREEN
-        );
-
-        JButton deleteButton = new StyledButton(
-        "Törlés",
-        new Color(250, 235, 235),
-        DANGER_COLOR
-        );
-
-
-        editButton.addActionListener(e -> editBike(bike));
-        deleteButton.addActionListener(e -> deleteBike(bike));
-
-        buttons.add(editButton);
-        buttons.add(deleteButton);
-
-        card.add(imageContainer, BorderLayout.NORTH);
-        card.add(details, BorderLayout.CENTER);
-        card.add(buttons, BorderLayout.SOUTH);
-
-        return card;
-}
-
-    
+    return new com.mycompany.bicikliprojekt.SwingUI.components.BikeCard(
+            bike.brand,
+            bike.model,
+            bike.type,
+            bike.serialNumber,
+            bike.imagePath,
+            () -> editBike(bike),
+            () -> deleteBike(bike)
+    );
+}   
      private void addBike() {
         BikeItem bike = showBikeDialog(null);
 

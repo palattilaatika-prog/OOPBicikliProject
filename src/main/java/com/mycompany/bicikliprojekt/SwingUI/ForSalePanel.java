@@ -4,6 +4,7 @@
  */
 package com.mycompany.bicikliprojekt.SwingUI;
 
+import com.mycompany.bicikliprojekt.SwingUI.components.BikeIcon;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
