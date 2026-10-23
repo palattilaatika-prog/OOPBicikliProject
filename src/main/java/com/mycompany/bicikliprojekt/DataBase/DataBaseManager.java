@@ -90,8 +90,93 @@ public class DataBaseManager {
             System.err.println("Error inserting stolen bike: " + e.getMessage());
         }
     }
+    //adds stolenbikes 
+    public void insertAllLopottBicikli(List<LopottBicikli> bikes) {
+    String sql = "INSERT INTO stolen_bikes(serialNumber, brand, model, reportedDate, source) VALUES(?, ?, ?, ?, ?)";
+
+    try (Connection conn = DataBase.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+        for (LopottBicikli bike : bikes) {
+            pstmt.setString(1, bike.getSerialNumber());
+            pstmt.setString(2, bike.getBrand());
+            pstmt.setString(3, bike.getModel());
+            pstmt.setString(4, bike.getReportedDate());
+            pstmt.setString(5, bike.getSource());
+            pstmt.addBatch();
+        }
+
+        pstmt.executeBatch(); //Sends in whole to db
+
+    } catch (SQLException e) {
+        System.err.println("Error batch inserting stolen bikes: " + e.getMessage());
+    }
+}
 
     //read operations
+    //all bikes for sale
+    public List<EladoBicikli> getAllEladoBicikli() {
+        List<EladoBicikli> forSaleBikes = new ArrayList<>();
+        String sql = "SELECT f.*, b.userId, b.brand, b.model, b.type, b.serialNumber "
+                   + "FROM for_sale_bikes f "
+                   + "JOIN bikes b ON f.bikeId = b.id";
+
+        try (Connection conn = DataBase.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                EladoBicikli bike = new EladoBicikli(
+                        rs.getInt("id"),
+                        rs.getInt("userId"),
+                        rs.getString("brand"),
+                        rs.getString("model"),
+                        rs.getString("type"),
+                        rs.getString("serialNumber"),
+                        rs.getInt("bikeId"),
+                        rs.getString("condition"),
+                        rs.getDouble("price"),
+                        rs.getString("imagePath"),
+                        rs.getString("description"),
+                        rs.getString("listedDate")
+                );
+                forSaleBikes.add(bike);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching all bikes for sale: " + e.getMessage());
+        }
+
+        return forSaleBikes;
+    }
+    //all stolen bikes
+    public List<LopottBicikli> getAllLopottBicikli() {
+        List<LopottBicikli> stolenBikes = new ArrayList<>();
+        String sql = "SELECT * FROM stolen_bikes";
+
+        try (Connection conn = DataBase.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                LopottBicikli bike = new LopottBicikli(
+                        rs.getInt("id"),
+                        rs.getString("brand"),
+                        rs.getString("model"),
+                        rs.getString("serialNumber"),
+                        rs.getString("reportedDate"),
+                        rs.getString("source")
+                );
+                stolenBikes.add(bike);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching all stolen bikes: " + e.getMessage());
+        }
+
+        return stolenBikes;
+    }
+    //bikes of a user
 
     public List<Bicikli> getBikesByUserId(int userId) {
         List<Bicikli> userBikes = new ArrayList<>();
@@ -121,7 +206,7 @@ public class DataBaseManager {
 
         return userBikes;
     }
-  
+  //finding a user
     public User getUserById(int userId) {
         String sql = "SELECT * FROM users WHERE id = ?";
         User user = null;
@@ -146,6 +231,7 @@ public class DataBaseManager {
 
         return user;
     }
+    // all users to list in UI
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM users";
@@ -169,6 +255,7 @@ public class DataBaseManager {
 
         return users;
     }
+    //searching a bike for sale
     public EladoBicikli getEladoBicikliById(int listingId) {
         String sql = "SELECT f.*, b.userId, b.brand, b.model, b.type, b.serialNumber "
                    + "FROM for_sale_bikes f "
@@ -205,6 +292,7 @@ public class DataBaseManager {
 
         return bike;
     }
+    //finding stolenbike
     public LopottBicikli getLopottBicikliById(int stolenId) {
         String sql = "SELECT * FROM stolen_bikes WHERE id = ?";
         LopottBicikli bike = null;
@@ -232,8 +320,55 @@ public class DataBaseManager {
 
         return bike;
     }
-    //update
+    //searching a stolen bike by serialnumber
+    public List<LopottBicikli> searchLopottBicikliBySerialNumber(String serialNumber) {
+        List<LopottBicikli> result = new ArrayList<>();
+        String sql = "SELECT * FROM stolen_bikes WHERE serialNumber LIKE ?";
 
+        try (Connection conn = DataBase.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, "%" + serialNumber + "%");
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                LopottBicikli bike = new LopottBicikli(
+                        rs.getInt("id"),
+                        rs.getString("brand"),
+                        rs.getString("model"),
+                        rs.getString("serialNumber"),
+                        rs.getString("reportedDate"),
+                        rs.getString("source")
+                );
+                result.add(bike);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error searching stolen bikes: " + e.getMessage());
+        }
+
+        return result;
+    }
+    //update
+    //updates the whole bike
+    public void updateBicikli(Bicikli bike) {
+        String sql = "UPDATE bikes SET brand = ?, model = ?, type = ?, serialNumber = ? WHERE id = ?";
+
+        try (Connection conn = DataBase.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, bike.getBrand());
+            pstmt.setString(2, bike.getModel());
+            pstmt.setString(3, bike.getType());
+            pstmt.setString(4, bike.getSerialNumber());
+            pstmt.setInt(5, bike.getBicikliid());
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Error updating bike: " + e.getMessage());
+        }
+    }
+    //updates the type of the bike
     public void updateBikeType(int bikeId, String newType) {
         String sql = "UPDATE bikes SET type = ? WHERE id = ?";
 
@@ -273,7 +408,7 @@ public class DataBaseManager {
             pstmt.setDouble(2, bike.getPrice());
             pstmt.setString(3, bike.getImagePath());
             pstmt.setString(4, bike.getDescription());
-            pstmt.setInt(5, bike.getBikeId()); // Using listing ID
+            pstmt.setInt(5, bike.getBicikliid()); // Using listing ID
             pstmt.executeUpdate();
 
         } catch (SQLException e) {

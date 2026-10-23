@@ -10,4 +10,16 @@
         <maven.compiler.release>26</maven.compiler.release>
         <exec.mainClass>com.mycompany.bicikliprojekt.Bicikliprojekt</exec.mainClass>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.50.3.0</version>
+        </dependency>
+         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.13.1</version>
+        </dependency>
+    </dependencies>
 </project>
