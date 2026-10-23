@@ -3,9 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.bicikliprojekt.DataBase;
-import com.mycompany.bicikliprojekt.model.Bicikli;
-import com.mycompany.bicikliprojekt.model.EladoBicikli;
-import com.mycompany.bicikliprojekt.model.LopottBicikli;
+import com.mycompany.bicikliprojekt.model.Bike;
+import com.mycompany.bicikliprojekt.model.ForSaleBike;
+import com.mycompany.bicikliprojekt.model.StolenBike;
 import com.mycompany.bicikliprojekt.model.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,7 +36,7 @@ public class DataBaseManager {
         }
     }
 
-    public void insertBicikli(Bicikli bike) {
+    public void insertBicikli(Bike bike) {
         String sql = "INSERT INTO bikes(userId, brand, model, type, serialNumber) VALUES(?, ?, ?, ?, ?)";
 
         try (Connection conn = DataBase.getConnection();
@@ -54,7 +54,7 @@ public class DataBaseManager {
         }
     }
 
-    public void insertEladoBicikli(EladoBicikli bike) {
+    public void insertEladoBicikli(ForSaleBike bike) {
         String sql = "INSERT INTO for_sale_bikes(bikeId, condition, price, imagePath, description, listedDate) VALUES(?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DataBase.getConnection();
@@ -73,7 +73,7 @@ public class DataBaseManager {
         }
     }
 
-    public void insertLopottBicikli(LopottBicikli bike) {
+    public void insertLopottBicikli(StolenBike bike) {
         String sql = "INSERT INTO stolen_bikes(serialNumber, brand, model, reportedDate, source) VALUES(?, ?, ?, ?, ?)";
 
         try (Connection conn = DataBase.getConnection();
@@ -91,13 +91,13 @@ public class DataBaseManager {
         }
     }
     //adds stolenbikes 
-    public void insertAllLopottBicikli(List<LopottBicikli> bikes) {
+    public void insertAllLopottBicikli(List<StolenBike> bikes) {
     String sql = "INSERT INTO stolen_bikes(serialNumber, brand, model, reportedDate, source) VALUES(?, ?, ?, ?, ?)";
 
     try (Connection conn = DataBase.getConnection();
          PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-        for (LopottBicikli bike : bikes) {
+        for (StolenBike bike : bikes) {
             pstmt.setString(1, bike.getSerialNumber());
             pstmt.setString(2, bike.getBrand());
             pstmt.setString(3, bike.getModel());
@@ -115,8 +115,8 @@ public class DataBaseManager {
 
     //read operations
     //all bikes for sale
-    public List<EladoBicikli> getAllEladoBicikli() {
-        List<EladoBicikli> forSaleBikes = new ArrayList<>();
+    public List<ForSaleBike> getAllEladoBicikli() {
+        List<ForSaleBike> forSaleBikes = new ArrayList<>();
         String sql = "SELECT f.*, b.userId, b.brand, b.model, b.type, b.serialNumber "
                    + "FROM for_sale_bikes f "
                    + "JOIN bikes b ON f.bikeId = b.id";
@@ -126,7 +126,7 @@ public class DataBaseManager {
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                EladoBicikli bike = new EladoBicikli(
+                ForSaleBike bike = new ForSaleBike(
                         rs.getInt("id"),
                         rs.getInt("userId"),
                         rs.getString("brand"),
@@ -150,8 +150,8 @@ public class DataBaseManager {
         return forSaleBikes;
     }
     //all stolen bikes
-    public List<LopottBicikli> getAllLopottBicikli() {
-        List<LopottBicikli> stolenBikes = new ArrayList<>();
+    public List<StolenBike> getAllLopottBicikli() {
+        List<StolenBike> stolenBikes = new ArrayList<>();
         String sql = "SELECT * FROM stolen_bikes";
 
         try (Connection conn = DataBase.getConnection();
@@ -159,7 +159,7 @@ public class DataBaseManager {
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                LopottBicikli bike = new LopottBicikli(
+                StolenBike bike = new StolenBike(
                         rs.getInt("id"),
                         rs.getString("brand"),
                         rs.getString("model"),
@@ -178,8 +178,8 @@ public class DataBaseManager {
     }
     //bikes of a user
 
-    public List<Bicikli> getBikesByUserId(int userId) {
-        List<Bicikli> userBikes = new ArrayList<>();
+    public List<Bike> getBikesByUserId(int userId) {
+        List<Bike> userBikes = new ArrayList<>();
         String sql = "SELECT * FROM bikes WHERE userId = ?";
 
         try (Connection conn = DataBase.getConnection();
@@ -189,7 +189,7 @@ public class DataBaseManager {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                Bicikli bike = new Bicikli(
+                Bike bike = new Bike(
                         rs.getInt("id"),
                         rs.getInt("userId"),
                         rs.getString("brand"),
@@ -256,12 +256,12 @@ public class DataBaseManager {
         return users;
     }
     //searching a bike for sale
-    public EladoBicikli getEladoBicikliById(int listingId) {
+    public ForSaleBike getEladoBicikliById(int listingId) {
         String sql = "SELECT f.*, b.userId, b.brand, b.model, b.type, b.serialNumber "
                    + "FROM for_sale_bikes f "
                    + "JOIN bikes b ON f.bikeId = b.id "
                    + "WHERE f.id = ?";
-        EladoBicikli bike = null;
+        ForSaleBike bike = null;
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -270,7 +270,7 @@ public class DataBaseManager {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                bike = new EladoBicikli(
+                bike = new ForSaleBike(
                         rs.getInt("id"),
                         rs.getInt("userId"),
                         rs.getString("brand"),
@@ -293,9 +293,9 @@ public class DataBaseManager {
         return bike;
     }
     //finding stolenbike
-    public LopottBicikli getLopottBicikliById(int stolenId) {
+    public StolenBike getLopottBicikliById(int stolenId) {
         String sql = "SELECT * FROM stolen_bikes WHERE id = ?";
-        LopottBicikli bike = null;
+        StolenBike bike = null;
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -304,7 +304,7 @@ public class DataBaseManager {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                bike = new LopottBicikli(
+                bike = new StolenBike(
                         rs.getInt("id"),
                         rs.getString("brand"),
                         rs.getString("model"),
@@ -321,8 +321,8 @@ public class DataBaseManager {
         return bike;
     }
     //searching a stolen bike by serialnumber
-    public List<LopottBicikli> searchLopottBicikliBySerialNumber(String serialNumber) {
-        List<LopottBicikli> result = new ArrayList<>();
+    public List<StolenBike> searchLopottBicikliBySerialNumber(String serialNumber) {
+        List<StolenBike> result = new ArrayList<>();
         String sql = "SELECT * FROM stolen_bikes WHERE serialNumber LIKE ?";
 
         try (Connection conn = DataBase.getConnection();
@@ -332,7 +332,7 @@ public class DataBaseManager {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                LopottBicikli bike = new LopottBicikli(
+                StolenBike bike = new StolenBike(
                         rs.getInt("id"),
                         rs.getString("brand"),
                         rs.getString("model"),
@@ -351,7 +351,7 @@ public class DataBaseManager {
     }
     //update
     //updates the whole bike
-    public void updateBicikli(Bicikli bike) {
+    public void updateBicikli(Bike bike) {
         String sql = "UPDATE bikes SET brand = ?, model = ?, type = ?, serialNumber = ? WHERE id = ?";
 
         try (Connection conn = DataBase.getConnection();
@@ -398,7 +398,7 @@ public class DataBaseManager {
             System.err.println("Error updating user: " + e.getMessage());
         }
     }
-    public void updateEladoBicikli(EladoBicikli bike) {
+    public void updateEladoBicikli(ForSaleBike bike) {
         String sql = "UPDATE for_sale_bikes SET condition = ?, price = ?, imagePath = ?, description = ? WHERE id = ?";
 
         try (Connection conn = DataBase.getConnection();
@@ -415,7 +415,7 @@ public class DataBaseManager {
             System.err.println("Error updating bike for sale: " + e.getMessage());
         }
     }
-    public void updateLopottBicikli(LopottBicikli bike) {
+    public void updateLopottBicikli(StolenBike bike) {
         String sql = "UPDATE stolen_bikes SET serialNumber = ?, brand = ?, model = ?, reportedDate = ?, source = ? WHERE id = ?";
 
         try (Connection conn = DataBase.getConnection();

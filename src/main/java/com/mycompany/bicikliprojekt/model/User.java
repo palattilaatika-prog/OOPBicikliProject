@@ -15,7 +15,7 @@ public class User {
     private int id;
     private String name;
     private String email;
-    private List<Bicikli> bikes; 
+    private List<Bike> bikes; 
     // The bikes of the user (list)
 
     public User(int id, String name, String email) {
@@ -26,19 +26,19 @@ public class User {
     }
 
     // Adding bike to user
-    public void addBike(Bicikli bike) {
+    public void addBike(Bike bike) {
         if (bike != null) {
             this.bikes.add(bike);
         }
     }
 
     // Removeing bike from user
-    public void removeBike(Bicikli bike) {
+    public void removeBike(Bike bike) {
         this.bikes.remove(bike);
     }
 
     // List of bikes (read-only)
-    public List<Bicikli> getBikes() {
+    public List<Bike> getBikes() {
         return Collections.unmodifiableList(bikes);
     }
     public void setUId(int userId){
@@ -68,5 +68,5 @@ public class User {
     public int getUId(){return id;}
     public String getUname(){return name;}
     public String getEmail(){return email;}
-    public List<Bicikli> getBiciklik(){return bikes;}
+    public List<Bike> getBiciklik(){return bikes;}
 }

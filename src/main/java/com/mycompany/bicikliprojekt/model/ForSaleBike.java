@@ -8,7 +8,7 @@ package com.mycompany.bicikliprojekt.model;
  *
  * @author Denes
  */
-public class EladoBicikli extends Bicikli{
+public class ForSaleBike extends Bike{
     private int bikeId;
     private String condition;
     private double price;
@@ -16,7 +16,7 @@ public class EladoBicikli extends Bicikli{
     private String description;
     private String listedDate;
 
-    public EladoBicikli(int id, int userId, String brand, String model, String type, String serialNumber,
+    public ForSaleBike(int id, int userId, String brand, String model, String type, String serialNumber,
                        int bikeId, String condition, double price, String imagePath, String description, String listedDate) {
         super(id, userId, brand, model, type, serialNumber);
         setBikeId(bikeId); //neceserry for database in future

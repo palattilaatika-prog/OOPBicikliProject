@@ -5,7 +5,7 @@
 package com.mycompany.bicikliprojekt.services;
 import com.mycompany.bicikliprojekt.API.BikeApiClient;
 import com.mycompany.bicikliprojekt.DataBase.DataBaseManager;
-import com.mycompany.bicikliprojekt.model.LopottBicikli;
+import com.mycompany.bicikliprojekt.model.StolenBike;
 
 import java.util.List;
 /**
@@ -24,7 +24,7 @@ public class StolenBikeService {
         System.out.println("API adatok frissítése indult...");
         
         //downloading from api
-        List<LopottBicikli> apiBikes = BikeApiClient.fetchStolenBikesFromApi();
+        List<StolenBike> apiBikes = BikeApiClient.fetchStolenBikesFromApi();
 
         if (!apiBikes.isEmpty()) {
             // saving in db

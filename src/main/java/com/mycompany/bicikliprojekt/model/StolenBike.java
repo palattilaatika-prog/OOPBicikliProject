@@ -8,11 +8,11 @@ package com.mycompany.bicikliprojekt.model;
  *
  * @author Denes
  */
-public class LopottBicikli extends BaseBike {
+public class StolenBike extends BaseBike {
     private String reportedDate;
     private String source;
 
-    public LopottBicikli(int id, String brand, String model, String serialNumber, String reportedDate, String source) {
+    public StolenBike(int id, String brand, String model, String serialNumber, String reportedDate, String source) {
         super(id, brand, model, serialNumber);
         setReportedDate(reportedDate);
         setSource(source);

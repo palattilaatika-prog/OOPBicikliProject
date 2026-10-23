@@ -4,7 +4,7 @@
  */
 package com.mycompany.bicikliprojekt.API;
 import com.google.gson.Gson;
-import com.mycompany.bicikliprojekt.model.LopottBicikli;
+import com.mycompany.bicikliprojekt.model.StolenBike;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -23,8 +23,8 @@ import java.util.List;
 public class BikeApiClient {
     private static final String API_URL = "https://bikeindex.org/api/v3/search?stolenness=stolen&per_page=10";
 
-    public static List<LopottBicikli> fetchStolenBikesFromApi() {
-        List<LopottBicikli> stolenBikes = new ArrayList<>();
+    public static List<StolenBike> fetchStolenBikesFromApi() {
+        List<StolenBike> stolenBikes = new ArrayList<>();
 
         try {
             URL url = new URL(API_URL);
@@ -65,7 +65,7 @@ public class BikeApiClient {
                         }
 
                         // creating new StolenBikes
-                        LopottBicikli stolenBike = new LopottBicikli(
+                        StolenBike stolenBike = new StolenBike(
                                 id,
                                 brand,
                                 model,
