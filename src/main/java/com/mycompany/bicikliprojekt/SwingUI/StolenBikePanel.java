@@ -9,6 +9,9 @@ import com.mycompany.bicikliprojekt.services.SessionManager;
 import com.mycompany.bicikliprojekt.model.Bike;
 import com.mycompany.bicikliprojekt.model.StolenBike;
 import com.mycompany.bicikliprojekt.model.User;
+import com.mycompany.bicikliprojekt.SwingUI.components.StyledButton;
+import com.mycompany.bicikliprojekt.SwingUI.components.RoundedPanel;
+import com.mycompany.bicikliprojekt.SwingUI.components.BikeIcon;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -59,12 +62,11 @@ public class StolenBikePanel extends JPanel {
         titlePanel.add(Box.createVerticalStrut(6));
         titlePanel.add(subtitle);
 
-        JButton reportButton = new JButton("+ Saját kerékpár bejelentése");
-        reportButton.setFont(new Font("SansSerif", Font.BOLD, 13));
-        reportButton.setFocusPainted(false);
-        reportButton.setBackground(new Color(38, 132, 91));
-        reportButton.setForeground(Color.WHITE);
-        reportButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        JButton reportButton = new StyledButton(
+                "+ Saját kerékpár bejelentése",
+                new Color(38, 132, 91),
+                Color.WHITE
+        );
         reportButton.addActionListener(e -> openReportDialog());
 
         headerPanel.add(titlePanel, BorderLayout.CENTER);
@@ -80,7 +82,11 @@ public class StolenBikePanel extends JPanel {
         searchField.setToolTipText("Keresés márka, modell vagy vázszám alapján");
         searchField.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        JButton searchButton = new JButton("Keresés");
+        JButton searchButton = new StyledButton(
+                "Keresés",
+                new Color(235, 242, 237),
+                new Color(35, 125, 85)
+        );
         searchButton.addActionListener(e -> refreshCards());
 
         searchPanel.add(new JLabel("Keresés:"), BorderLayout.WEST);
@@ -134,7 +140,7 @@ public class StolenBikePanel extends JPanel {
 
             JOptionPane.showMessageDialog(
                 this,
-                "Nem sikerült elmenteni a bejelentést.\n"
+                "Betöltési hiba"
                         + errorMessage,
                 "Mentési hiba",
                 JOptionPane.ERROR_MESSAGE
@@ -206,18 +212,12 @@ public class StolenBikePanel extends JPanel {
     }
 
     private JPanel createBikeCard(StolenBike bike) {
-        JPanel card = new JPanel(new BorderLayout(10, 12));
+        JPanel card = new RoundedPanel(18);
+        card.setLayout(new BorderLayout(10, 12));
         card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 225, 232)),
-                new EmptyBorder(16, 16, 16, 16)
-        ));
-
+        card.setBorder(new EmptyBorder(16, 16, 16, 16));
         // Ikon: egyelőre nincs képmező a meglévő StolenBike modellben.
-        JLabel icon = new JLabel("\uD83D\uDEB2", SwingConstants.CENTER);
-        icon.setFont(new Font("SansSerif", Font.PLAIN, 38));
-        icon.setOpaque(true);
-        icon.setBackground(new Color(235, 241, 248));
+        JLabel icon = new JLabel(new BikeIcon(75, 75));
         icon.setPreferredSize(new Dimension(75, 75));
 
         JPanel iconPanel = new JPanel(new BorderLayout());
@@ -255,8 +255,11 @@ public class StolenBikePanel extends JPanel {
         top.add(iconPanel, BorderLayout.WEST);
         top.add(details, BorderLayout.CENTER);
 
-        JButton detailsButton = new JButton("Részletek");
-        detailsButton.setFocusPainted(false);
+        JButton detailsButton = new StyledButton(
+                "Részletek",
+                new Color(235, 242, 237),
+                new Color(35, 125, 85)
+        );
         detailsButton.addActionListener(e -> showBikeDetails(bike));
 
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
@@ -318,8 +321,9 @@ public class StolenBikePanel extends JPanel {
 
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBorder(new EmptyBorder(20, 22, 20, 22));
+        JPanel form = new RoundedPanel(18);
+        form.setLayout(new GridBagLayout());
+        form.setBorder(new EmptyBorder(22, 24, 22, 24));
         form.setBackground(Color.WHITE);
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -353,8 +357,44 @@ public class StolenBikePanel extends JPanel {
         JTextField serialField = new JTextField(22);
         JTextField dateField = new JTextField(LocalDate.now().toString(), 22);
         JTextField sourceField = new JTextField(22);
+        
+        Color fieldBorderColor = new Color(215, 225, 219);
 
-        int row = 0;
+        JTextField[] dialogFields = {
+            brandField, modelField, serialField, dateField, sourceField
+        };
+
+        for (JTextField field : dialogFields) {
+            field.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            field.setForeground(new Color(35, 50, 60));
+            field.setBackground(Color.WHITE);
+            field.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(fieldBorderColor),
+                    BorderFactory.createEmptyBorder(8, 10, 8, 10)
+            ));
+        }
+
+        bikeSelector.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        bikeSelector.setBackground(Color.WHITE);
+        bikeSelector.setBorder(
+                BorderFactory.createLineBorder(fieldBorderColor)
+        );
+
+        ownBikeButton.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        manualBikeButton.setFont(new Font("SansSerif", Font.PLAIN, 13));
+
+        JLabel formTitle = new JLabel("Add meg a kerékpár adatait");
+        formTitle.setFont(new Font("SansSerif", Font.BOLD, 18));
+        formTitle.setForeground(new Color(35, 45, 40));
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(0, 6, 12, 6);
+        form.add(formTitle, gbc);
+
+        gbc.insets = new Insets(7, 6, 7, 6);
+        int row = 1;
 
         addFormRow(form, gbc, row++, "Kerékpár kiválasztása:", bikeSelector);
         addFormRow(form, gbc, row++, "", ownBikeButton);
@@ -411,10 +451,18 @@ public class StolenBikePanel extends JPanel {
 
         updateMode.run();
 
-        JButton cancelButton = new JButton("Mégse");
+        JButton cancelButton = new StyledButton(
+                "Mégse",
+                new Color(235, 242, 237),
+                new Color(35, 125, 85)
+        );
         cancelButton.addActionListener(e -> dialog.dispose());
 
-        JButton submitButton = new JButton("Bejelentés elküldése");
+        JButton submitButton = new StyledButton(
+                "Bejelentés elküldése",
+                new Color(38, 132, 91),
+                Color.WHITE
+        );
         submitButton.addActionListener(e -> {
             String brand = brandField.getText().trim();
             String model = modelField.getText().trim();
@@ -498,9 +546,14 @@ public class StolenBikePanel extends JPanel {
         gbc.gridwidth = 2;
         form.add(buttons, gbc);
 
-        dialog.setContentPane(new JScrollPane(form));
-        dialog.setSize(570, 570);
-        dialog.setMinimumSize(new Dimension(520, 500));
+        JScrollPane formScrollPane = new JScrollPane(form);
+        formScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        formScrollPane.getViewport().setBackground(new Color(245, 247, 250));
+        formScrollPane.setBackground(new Color(245, 247, 250));
+
+        dialog.setContentPane(formScrollPane);
+        dialog.setSize(620, 580);
+        dialog.setMinimumSize(new Dimension(580, 540));
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
