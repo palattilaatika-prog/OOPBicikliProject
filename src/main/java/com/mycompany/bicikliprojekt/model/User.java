@@ -12,18 +12,23 @@ import java.util.List;
  * @author Denes
  */
 public class User {
-    private int id;
-    private String name;
-    private String email;
-    private String password;
-    private List<Bike> bikes; 
+    int id;
+    String name;
+    String email;
+    String password;
+    String phoneNumber;
+    List<Bike> bikes; 
     // The bikes of the user (list)
+    public User(int id, String name, String email, String password) {
+        this(id, name, email, password, null);
+    }
 
-    public User(int id, String name, String email,String password) {
+    public User(int id, String name, String email,String password,String phoneNumber) {
         setUId(id);
         setUname(name);
         setEmail(email);
         this.password = password;
+        setPhoneNumber(phoneNumber);
         this.bikes = new ArrayList<>();
     }
 
@@ -83,4 +88,28 @@ public class User {
     public String getUname(){return name;}
     public String getEmail(){return email;}
     public List<Bike> getBiciklik(){return bikes;}
+    
+    public String getPhoneNumber() {
+    return phoneNumber;
+}
+
+public void setPhoneNumber(String phoneNumber) {
+    if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+        this.phoneNumber = null;
+        return;
+    }
+
+    String normalized = phoneNumber.trim();
+    String digits = normalized.replaceAll("\\D", "");
+
+    if (!normalized.matches("\\+?[0-9()\\s.-]+")
+            || digits.length() < 7
+            || digits.length() > 15) {
+        throw new IllegalArgumentException(
+                "Adj meg érvényes telefonszámot 7–15 számjeggyel!"
+        );
+    }
+
+    this.phoneNumber = normalized;
+}
 }

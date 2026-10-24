@@ -41,7 +41,8 @@ public class DataBaseManager implements AuthService{
                             rs.getInt("id"),
                             rs.getString("name"),
                             rs.getString("email"),
-                            rs.getString("password")
+                            rs.getString("password"),
+                            rs.getString("phoneNumber")
                     );
                 }
             }
@@ -54,7 +55,8 @@ public class DataBaseManager implements AuthService{
 
     @Override
     public boolean register(User user) {
-        String sql = "INSERT INTO users(name, email, password) VALUES(?, ?, ?)";
+        String sql = "INSERT INTO users(name, email, password, phoneNumber) "
+        + "VALUES(?, ?, ?, ?)";
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -62,6 +64,7 @@ public class DataBaseManager implements AuthService{
             pstmt.setString(1, user.getUname());
             pstmt.setString(2, user.getEmail());
             pstmt.setString(3, PasswordHash.hashPassword(user.getPassword()));
+            pstmt.setString(4, user.getPhoneNumber());
 
             return pstmt.executeUpdate() > 0;
 
@@ -261,7 +264,8 @@ public class DataBaseManager implements AuthService{
                         rs.getInt("id"),
                         rs.getString("name"),
                         rs.getString("email"),
-                        rs.getString("password")
+                        rs.getString("password"),
+                        rs.getString("phoneNumber")
                 );
             }
         }
@@ -286,7 +290,8 @@ public class DataBaseManager implements AuthService{
                         rs.getInt("id"),
                         rs.getString("name"),
                         rs.getString("email"),
-                        rs.getString("password")
+                        rs.getString("password"),
+                        rs.getString("phoneNumber")
                 );
                 users.add(user);
             }
@@ -426,7 +431,8 @@ public class DataBaseManager implements AuthService{
         }
     }
     public void updateUser(User user) {
-        String sql = "UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?";
+        String sql = "UPDATE users SET name = ?, email = ?, password = ?, "
+        + "phoneNumber = ? WHERE id = ?";
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -435,7 +441,8 @@ public class DataBaseManager implements AuthService{
             pstmt.setString(2, user.getEmail());
             // before updateing we hash the password
             pstmt.setString(3, PasswordHash.hashPassword(user.getPassword()));
-            pstmt.setInt(4, user.getUId());
+            pstmt.setString(4, user.getPhoneNumber());
+            pstmt.setInt(5, user.getUId());
             pstmt.executeUpdate();
 
         } catch (SQLException e) {

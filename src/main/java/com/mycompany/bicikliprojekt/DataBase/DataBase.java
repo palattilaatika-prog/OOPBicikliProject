@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.ResultSet;
 
 /**
  *
@@ -26,7 +27,8 @@ public class DataBase {
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "name TEXT NOT NULL, "
                 + "email TEXT NOT NULL UNIQUE, "
-                + "password TEXT NOT NULL"
+                + "password TEXT NOT NULL, "
+                + "phoneNumber TEXT"
                 + ");";
 
         String createBikesTable = "CREATE TABLE IF NOT EXISTS bikes ("
@@ -65,6 +67,21 @@ public class DataBase {
 
             stmt.execute(enableForeignKeys);
             stmt.execute(createUsersTable);
+            
+            boolean hasPhoneNumber = false;
+
+            try (ResultSet columns = stmt.executeQuery("PRAGMA table_info(users)")) {
+                while (columns.next()) {
+                    if ("phoneNumber".equalsIgnoreCase(columns.getString("name"))) {
+                        hasPhoneNumber = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasPhoneNumber) {
+                stmt.execute("ALTER TABLE users ADD COLUMN phoneNumber TEXT");
+            }
             stmt.execute(createBikesTable);
             stmt.execute(createForSaleBikesTable);
             stmt.execute(createStolenBikesTable);
