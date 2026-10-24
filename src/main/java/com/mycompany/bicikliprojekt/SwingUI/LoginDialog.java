@@ -117,10 +117,10 @@ public class LoginDialog extends JDialog {
         }
 
         String name = JOptionPane.showInputDialog(
-                this,
-                "Add meg a nevedet:",
-                "Regisztráció",
-                JOptionPane.QUESTION_MESSAGE
+        this,
+        "Add meg a nevedet:",
+        "Regisztráció",
+        JOptionPane.QUESTION_MESSAGE
         );
 
         if (name == null) {
@@ -138,9 +138,22 @@ public class LoginDialog extends JDialog {
             showError("A jelszónak legalább 8 karakter hosszúnak kell lennie!");
             return;
         }
+        
+        String phoneNumber = JOptionPane.showInputDialog(
+                this,
+                "Add meg a telefonszámodat:",
+                "Regisztráció",
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (phoneNumber == null) {
+            return;
+        }
+
+        phoneNumber = phoneNumber.trim();
 
         try {
-            User newUser = new User(1, name, email, password);
+            User newUser = new User(1, name, email, password, phoneNumber);
 
             if (databaseManager.register(newUser)) {
                 JOptionPane.showMessageDialog(

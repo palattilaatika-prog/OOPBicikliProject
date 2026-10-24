@@ -139,15 +139,20 @@ public class ForSalePanel extends JPanel {
                 + ex.getMessage());
     }
     }
+    
+    private boolean isOwner(ForSaleBike bike) {
+        User currentUser = SessionManager.getCurrentUser();
+
+        return currentUser != null
+                && currentUser.getUId() == bike.getUserId();
+    }
 
     private JPanel createBikeCard(ForSaleBike bike) {
         JPanel card = new JPanel(new BorderLayout(8, 8));
         card.setBackground(Color.WHITE);
 
         card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(
-                        new Color(215, 215, 215)
-                ),
+                BorderFactory.createLineBorder(new Color(215, 215, 215)),
                 new EmptyBorder(12, 12, 12, 12)
         ));
 
@@ -158,16 +163,13 @@ public class ForSalePanel extends JPanel {
         String imagePath = bike.getImagePath();
 
         if (imagePath != null
-            && !imagePath.isBlank()
-            && new File(imagePath).isFile()) {
+                && !imagePath.isBlank()
+                && new File(imagePath).isFile()) {
             ImageIcon original = new ImageIcon(imagePath);
-
             Image scaled = original.getImage().getScaledInstance(
                     160, 120, Image.SCALE_SMOOTH
             );
-
             imageLabel.setIcon(new ImageIcon(scaled));
-
         } else {
             imageLabel.setIcon(new BikeIcon(120, 120));
         }
@@ -181,14 +183,25 @@ public class ForSalePanel extends JPanel {
 
         JLabel type = new JLabel("Típus: " + bike.getType());
         JLabel condition = new JLabel("Állapot: " + bike.getCondition());
+
         JLabel price = new JLabel(
                 String.format("%,.0f lej", bike.getPrice())
         );
         price.setFont(new Font("SansSerif", Font.BOLD, 20));
         price.setForeground(new Color(35, 125, 75));
 
+        User seller = databaseManager.getUserById(bike.getUserId());
+
+        String sellerPhone = seller == null
+                || seller.getPhoneNumber() == null
+                || seller.getPhoneNumber().isBlank()
+                ? "Nincs megadva"
+                : seller.getPhoneNumber();
+
+        JLabel phone = new JLabel("Eladó telefonszáma: " + sellerPhone);
+
         JTextArea description = new JTextArea(
-        bike.getDescription() == null ? "" : bike.getDescription()
+                bike.getDescription() == null ? "" : bike.getDescription()
         );
         description.setLineWrap(true);
         description.setWrapStyleWord(true);
@@ -206,6 +219,8 @@ public class ForSalePanel extends JPanel {
         details.add(Box.createVerticalStrut(8));
         details.add(price);
         details.add(Box.createVerticalStrut(8));
+        details.add(phone);
+        details.add(Box.createVerticalStrut(4));
         details.add(description);
 
         JPanel buttons = new JPanel(
@@ -214,22 +229,24 @@ public class ForSalePanel extends JPanel {
         buttons.setOpaque(false);
 
         JButton editButton = new StyledButton(
-        "Módosítás",
-        new Color(235, 242, 237),
-        new Color(35, 125, 85)
+                "Módosítás",
+                new Color(235, 242, 237),
+                new Color(35, 125, 85)
         );
 
         JButton deleteButton = new StyledButton(
-        "Törlés",
-        new Color(250, 235, 235),
-        new Color(200, 55, 55)
+                "Törlés",
+                new Color(250, 235, 235),
+                new Color(200, 55, 55)
         );
 
         editButton.addActionListener(e -> editBike(bike));
         deleteButton.addActionListener(e -> deleteBike(bike));
 
-        buttons.add(editButton);
-        buttons.add(deleteButton);
+        if (isOwner(bike)) {
+            buttons.add(editButton);
+            buttons.add(deleteButton);
+        }
 
         card.add(imageLabel, BorderLayout.NORTH);
         card.add(details, BorderLayout.CENTER);
@@ -309,28 +326,37 @@ public class ForSalePanel extends JPanel {
     }
 
     private void editBike(ForSaleBike bike) {
-    ListingDetails edited = showBikeDialog(bike, null);
+        if (!isOwner(bike)) {
+            showError("Csak a saját hirdetésedet módosíthatod.");
+            return;
+        }
 
-    if (edited == null) {
-        return;
-    }
+        ListingDetails edited = showBikeDialog(bike, null);
 
-    try {
-        bike.setCondition(edited.condition);
-        bike.setPrice(edited.price);
-        bike.setImagePath(edited.imagePath);
-        bike.setDescription(edited.description);
+        if (edited == null) {
+            return;
+        }
 
-        databaseManager.updateEladoBicikli(bike);
-        loadBikes();
+        try {
+            bike.setCondition(edited.condition);
+            bike.setPrice(edited.price);
+            bike.setImagePath(edited.imagePath);
+            bike.setDescription(edited.description);
 
-    } catch (Exception ex) {
-        showError("Nem sikerült módosítani a hirdetést: "
-                + ex.getMessage());
-    }
-    }
+            databaseManager.updateEladoBicikli(bike);
+            loadBikes();
+
+        } catch (Exception ex) {
+            showError("Nem sikerült módosítani a hirdetést: "
+                    + ex.getMessage());
+        }
+        }
 
     private void deleteBike(ForSaleBike bike) {
+        if (!isOwner(bike)) {
+            showError("Csak a saját hirdetésedet törölheted.");
+            return;
+        }
         int answer = JOptionPane.showConfirmDialog(
                 this,
                 "Biztosan törlöd ezt a hirdetést?",
