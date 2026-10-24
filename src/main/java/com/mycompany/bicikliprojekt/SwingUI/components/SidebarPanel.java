@@ -19,6 +19,11 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import java.awt.BasicStroke;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import javax.swing.Icon;
 
 /**
  *
@@ -69,8 +74,7 @@ public class SidebarPanel extends JPanel {
         ));
         logoPanel.setAlignmentX(LEFT_ALIGNMENT);
 
-        JLabel logoIcon = new JLabel("🚲");
-        logoIcon.setFont(new Font("SansSerif", Font.PLAIN, 36));
+        JLabel logoIcon = new JLabel(new BikeIcon(56, 39));
 
         JLabel logoText = new JLabel(
                 "<html><b>Bike</b><br><font color='#237D55'>Manager</font></html>"
@@ -86,16 +90,16 @@ public class SidebarPanel extends JPanel {
         content.add(Box.createVerticalStrut(42));
 
         profileButton = createNavigationButton(
-                "♙", "Profil", true, profileAction
+                new MenuIcon(MenuIconType.PROFILE), "Profil", true, profileAction
         );
         forSaleButton = createNavigationButton(
-                "⚿", "Eladó kerékpárok", false, forSaleAction
+                new MenuIcon(MenuIconType.SALE), "Eladó kerékpárok", false, forSaleAction
         );
         stolenButton = createNavigationButton(
-                "⬡", "Ellopott kerékpárok", false, stolenAction
+                new MenuIcon(MenuIconType.STOLEN), "Ellopott kerékpárok", false, stolenAction
         );
         newsButton = createNavigationButton(
-                "▤", "Hírek", false, newsAction
+                new MenuIcon(MenuIconType.NEWS), "Hírek", false, newsAction
         );
 
         content.add(profileButton);
@@ -119,42 +123,38 @@ public class SidebarPanel extends JPanel {
     }
 
     private JButton createNavigationButton(
-            String icon,
+            Icon icon,
             String text,
             boolean selected,
             ActionListener action) {
 
-        JButton button = new JButton(
-                "<html><span style='font-size:16px'>"
-                + icon + "</span>&nbsp;&nbsp;&nbsp;"
-                + text + "</html>"
-        );
+            JButton button = new JButton(text, icon);
 
-        button.setFont(new Font("SansSerif", Font.PLAIN, 15));
-        button.setForeground(DARK_TEXT);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setHorizontalTextPosition(SwingConstants.LEADING);
-        button.setMargin(new Insets(0, 14, 0, 8));
-        button.setPreferredSize(new Dimension(226, 54));
-        button.setMinimumSize(new Dimension(226, 54));
-        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 54));
-        button.setAlignmentX(LEFT_ALIGNMENT);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setOpaque(true);
-        button.setContentAreaFilled(true);
-        button.setBackground(
-                selected ? SELECTED_BACKGROUND : SIDEBAR_BACKGROUND
-        );
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            button.setFont(new Font("SansSerif", Font.PLAIN, 15));
+            button.setForeground(DARK_TEXT);
+            button.setHorizontalAlignment(SwingConstants.LEFT);
+            button.setHorizontalTextPosition(SwingConstants.TRAILING);
+            button.setIconTextGap(16);
+            button.setMargin(new Insets(0, 14, 0, 8));
+            button.setPreferredSize(new Dimension(226, 54));
+            button.setMinimumSize(new Dimension(226, 54));
+            button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 54));
+            button.setAlignmentX(LEFT_ALIGNMENT);
+            button.setFocusPainted(false);
+            button.setBorderPainted(false);
+            button.setOpaque(true);
+            button.setContentAreaFilled(true);
+            button.setBackground(
+                    selected ? SELECTED_BACKGROUND : SIDEBAR_BACKGROUND
+            );
+            button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        if (action != null) {
-            button.addActionListener(action);
+            if (action != null) {
+                button.addActionListener(action);
+            }
+
+            return button;
         }
-
-        return button;
-    }
-
     public void setActivePage(String page) {
         setButtonSelected(profileButton, "Profil".equals(page));
         setButtonSelected(forSaleButton, "Eladó kerékpárok".equals(page));
@@ -171,5 +171,82 @@ public class SidebarPanel extends JPanel {
         button.setForeground(
                 selected ? PRIMARY_GREEN : DARK_TEXT
         );
+    }
+    private enum MenuIconType {
+    PROFILE, SALE, STOLEN, NEWS
+}
+
+    private static class MenuIcon implements Icon {
+        private final MenuIconType type;
+
+        MenuIcon(MenuIconType type) {
+            this.type = type;
+        }
+
+        @Override
+        public int getIconWidth() {
+            return 24;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 24;
+        }
+
+        @Override
+        public void paintIcon(
+                java.awt.Component component,
+                Graphics graphics,
+                int x,
+                int y) {
+
+            Graphics2D g = (Graphics2D) graphics.create();
+            g.translate(x, y);
+            g.setColor(new Color(35, 65, 70));
+            g.setStroke(new BasicStroke(
+                    1.8f,
+                    BasicStroke.CAP_ROUND,
+                    BasicStroke.JOIN_ROUND
+            ));
+            g.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON
+            );
+
+            switch (type) {
+                case PROFILE:
+                    g.drawOval(8, 2, 8, 8);
+                    g.drawArc(4, 11, 16, 12, 0, 180);
+                    break;
+
+                case SALE:
+                    int[] saleX = {4, 13, 21, 21, 11};
+                    int[] saleY = {4, 4, 12, 20, 20};
+                    g.drawPolygon(saleX, saleY, saleX.length);
+                    g.drawOval(7, 7, 3, 3);
+                    break;
+
+                case STOLEN:
+                    g.drawOval(1, 13, 8, 8);
+                    g.drawOval(15, 13, 8, 8);
+                    g.drawLine(5, 17, 11, 9);
+                    g.drawLine(11, 9, 17, 17);
+                    g.drawLine(5, 17, 13, 17);
+                    g.drawLine(13, 17, 11, 9);
+                    g.drawLine(11, 9, 18, 9);
+                    g.drawLine(18, 9, 19, 13);
+                    break;
+
+                case NEWS:
+                    g.drawRoundRect(4, 2, 16, 20, 2, 2);
+                    g.drawLine(8, 7, 16, 7);
+                    g.drawLine(8, 11, 16, 11);
+                    g.drawLine(8, 15, 16, 15);
+                    g.drawLine(8, 19, 14, 19);
+                    break;
+            }
+
+            g.dispose();
+        }
     }
 }
