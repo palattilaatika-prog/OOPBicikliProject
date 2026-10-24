@@ -116,7 +116,9 @@ public class DataBaseManager implements AuthService{
     }
 
     public void insertLopottBicikli(StolenBike bike) {
-        String sql = "INSERT INTO stolen_bikes(serialNumber, brand, model, reportedDate, source) VALUES(?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO stolen_bikes"
+                + "(serialNumber, brand, model, reportedDate, source, reporterUserId) "
+                + "VALUES(?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -126,6 +128,7 @@ public class DataBaseManager implements AuthService{
             pstmt.setString(3, bike.getModel());
             pstmt.setString(4, bike.getReportedDate());
             pstmt.setString(5, bike.getSource());
+            pstmt.setInt(6, bike.getReporterUserId());
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -134,26 +137,29 @@ public class DataBaseManager implements AuthService{
     }
     //adds stolenbikes 
     public void insertAllLopottBicikli(List<StolenBike> bikes) {
-    String sql = "INSERT INTO stolen_bikes(serialNumber, brand, model, reportedDate, source) VALUES(?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO stolen_bikes"
+                + "(serialNumber, brand, model, reportedDate, source, reporterUserId) "
+                + "VALUES(?, ?, ?, ?, ?, ?)";
 
-    try (Connection conn = DataBase.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DataBase.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-        for (StolenBike bike : bikes) {
-            pstmt.setString(1, bike.getSerialNumber());
-            pstmt.setString(2, bike.getBrand());
-            pstmt.setString(3, bike.getModel());
-            pstmt.setString(4, bike.getReportedDate());
-            pstmt.setString(5, bike.getSource());
-            pstmt.addBatch();
+            for (StolenBike bike : bikes) {
+                pstmt.setString(1, bike.getSerialNumber());
+                pstmt.setString(2, bike.getBrand());
+                pstmt.setString(3, bike.getModel());
+                pstmt.setString(4, bike.getReportedDate());
+                pstmt.setString(5, bike.getSource());
+                pstmt.setInt(6, bike.getReporterUserId());
+                pstmt.addBatch();
+            }
+
+            pstmt.executeBatch();
+
+        } catch (SQLException e) {
+            System.err.println("Error batch inserting stolen bikes: " + e.getMessage());
         }
-
-        pstmt.executeBatch(); //Sends in whole to db
-
-    } catch (SQLException e) {
-        System.err.println("Error batch inserting stolen bikes: " + e.getMessage());
     }
-}
 
     //read operations
     //all bikes for sale
@@ -202,12 +208,13 @@ public class DataBaseManager implements AuthService{
 
             while (rs.next()) {
                 StolenBike bike = new StolenBike(
-                        rs.getInt("id"),
-                        rs.getString("brand"),
-                        rs.getString("model"),
-                        rs.getString("serialNumber"),
-                        rs.getString("reportedDate"),
-                        rs.getString("source")
+                   rs.getInt("id"),
+                   rs.getInt("reporterUserId"),
+                   rs.getString("brand"),
+                   rs.getString("model"),
+                   rs.getString("serialNumber"),
+                   rs.getString("reportedDate"),
+                   rs.getString("source")
                 );
                 stolenBikes.add(bike);
             }
@@ -352,13 +359,14 @@ public class DataBaseManager implements AuthService{
 
             if (rs.next()) {
                 bike = new StolenBike(
-                        rs.getInt("id"),
-                        rs.getString("brand"),
-                        rs.getString("model"),
-                        rs.getString("serialNumber"),
-                        rs.getString("reportedDate"),
-                        rs.getString("source")
-                );
+                    rs.getInt("id"),
+                    rs.getInt("reporterUserId"),
+                    rs.getString("brand"),
+                    rs.getString("model"),
+                    rs.getString("serialNumber"),
+                    rs.getString("reportedDate"),
+                    rs.getString("source")
+            );
             }
 
         } catch (SQLException e) {
@@ -381,6 +389,7 @@ public class DataBaseManager implements AuthService{
             while (rs.next()) {
                 StolenBike bike = new StolenBike(
                         rs.getInt("id"),
+                        rs.getInt("reporterUserId"),
                         rs.getString("brand"),
                         rs.getString("model"),
                         rs.getString("serialNumber"),
@@ -528,15 +537,15 @@ public class DataBaseManager implements AuthService{
             System.err.println("Error deleting sale listing: " + e.getMessage());
         }
     }
-    public void deleteLopottBicikliById(int stolenBikeId) {
-        String sql = "DELETE FROM stolen_bikes WHERE id = ?";
+    public void deleteLopottBicikliById(int stolenBikeId, int reporterUserId) {
+        String sql = "DELETE FROM stolen_bikes WHERE id = ? AND reporterUserId = ?";
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, stolenBikeId);
-            int rowsAffected = pstmt.executeUpdate();
-            System.out.println("Deleted " + rowsAffected + " stolen bike record(s).");
+            pstmt.setInt(2, reporterUserId);
+            pstmt.executeUpdate();
 
         } catch (SQLException e) {
             System.err.println("Error deleting stolen bike record: " + e.getMessage());

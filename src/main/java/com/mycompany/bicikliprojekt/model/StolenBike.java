@@ -11,15 +11,44 @@ package com.mycompany.bicikliprojekt.model;
 public class StolenBike extends BaseBike {
     private String reportedDate;
     private String source;
+    private int reporterUserId;
 
-    public StolenBike(int id, String brand, String model, String serialNumber, String reportedDate, String source) {
+    public StolenBike(
+            int id,
+            String brand,
+            String model,
+            String serialNumber,
+            String reportedDate,
+            String source
+    ) {
+        this(id, 0, brand, model, serialNumber, reportedDate, source);
+    }
+    public StolenBike(
+            int id,
+            int reporterUserId,
+            String brand,
+            String model,
+            String serialNumber,
+            String reportedDate,
+            String source
+    ) {
         super(id, brand, model, serialNumber);
         setReportedDate(reportedDate);
         setSource(source);
+        this.reporterUserId = reporterUserId;
     }
 
-    public String getReportedDate() { return reportedDate; }
-    public String getSource() { return source; }
+    public String getReportedDate() {
+        return reportedDate;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public int getReporterUserId() {
+        return reporterUserId;
+    }
 
     public void setReportedDate(String reportedDate) {
         if (reportedDate == null || reportedDate.trim().isEmpty()) {

@@ -59,7 +59,8 @@ public class DataBase {
                 + "brand TEXT NOT NULL, "
                 + "model TEXT NOT NULL, "
                 + "reportedDate TEXT NOT NULL, "
-                + "source TEXT NOT NULL"
+                + "source TEXT NOT NULL, "
+                + "reporterUserId INTEGER"
                 + ");";
 
         try (Connection conn = getConnection();
@@ -85,6 +86,20 @@ public class DataBase {
             stmt.execute(createBikesTable);
             stmt.execute(createForSaleBikesTable);
             stmt.execute(createStolenBikesTable);
+            boolean hasReporterUserId = false;
+
+        try (ResultSet columns = stmt.executeQuery("PRAGMA table_info(stolen_bikes)")) {
+            while (columns.next()) {
+                if ("reporterUserId".equalsIgnoreCase(columns.getString("name"))) {
+                    hasReporterUserId = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasReporterUserId) {
+            stmt.execute("ALTER TABLE stolen_bikes ADD COLUMN reporterUserId INTEGER");
+        }
 
             System.out.println("Database tables initialized successfully.");
 

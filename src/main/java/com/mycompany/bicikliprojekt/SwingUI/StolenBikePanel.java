@@ -210,6 +210,13 @@ public class StolenBikePanel extends JPanel {
         cardsPanel.revalidate();
         cardsPanel.repaint();
     }
+    
+    private boolean isReporter(StolenBike bike) {
+        User currentUser = SessionManager.getCurrentUser();
+
+        return currentUser != null
+                && currentUser.getUId() == bike.getReporterUserId();
+    }
 
     private JPanel createBikeCard(StolenBike bike) {
         JPanel card = new RoundedPanel(18);
@@ -238,6 +245,17 @@ public class StolenBikePanel extends JPanel {
         JLabel date = new JLabel(
                 "Bejelentve: " + safe(bike.getReportedDate())
         );
+        User reporter = databaseManager.getUserById(bike.getReporterUserId());
+
+        String phoneNumber = reporter == null
+                || reporter.getPhoneNumber() == null
+                || reporter.getPhoneNumber().isBlank()
+                ? "Nincs megadva"
+                : reporter.getPhoneNumber();
+
+        JLabel phone = new JLabel("Bejelentő telefonszáma: " + phoneNumber);
+        phone.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        
         date.setFont(new Font("SansSerif", Font.PLAIN, 12));
         date.setForeground(new Color(95, 105, 120));
 
@@ -249,6 +267,8 @@ public class StolenBikePanel extends JPanel {
         details.add(serial);
         details.add(Box.createVerticalStrut(5));
         details.add(date);
+        details.add(Box.createVerticalStrut(5));
+        details.add(phone);
 
         JPanel top = new JPanel(new BorderLayout(12, 0));
         top.setOpaque(false);
@@ -265,6 +285,16 @@ public class StolenBikePanel extends JPanel {
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         bottom.setOpaque(false);
         bottom.add(detailsButton);
+        
+        if (isReporter(bike)) {
+            JButton deleteButton = new StyledButton(
+                    "Saját bejelentés törlése",
+                    new Color(250, 235, 235),
+                    new Color(200, 55, 55)
+            );
+            deleteButton.addActionListener(e -> deleteStolenBike(bike));
+            bottom.add(deleteButton);
+        }
 
         card.add(top, BorderLayout.CENTER);
         card.add(bottom, BorderLayout.SOUTH);
@@ -286,6 +316,33 @@ public class StolenBikePanel extends JPanel {
                 "Kerékpár részletei",
                 JOptionPane.INFORMATION_MESSAGE
         );
+    }
+    
+    private void deleteStolenBike(StolenBike bike) {
+        if (!isReporter(bike)) {
+            showError("Csak a saját bejelentésedet törölheted.");
+            return;
+        }
+
+        int answer = JOptionPane.showConfirmDialog(
+                this,
+                "Biztosan törlöd a saját bejelentésedet?",
+                "Bejelentés törlése",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (answer != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        User currentUser = SessionManager.getCurrentUser();
+
+        databaseManager.deleteLopottBicikliById(
+                bike.getBicikliid(),
+                currentUser.getUId()
+        );
+
+        loadStolenBikes();
     }
 
     private void openReportDialog() {
@@ -516,7 +573,13 @@ public class StolenBikePanel extends JPanel {
 
             try {
                 StolenBike stolenBike = new StolenBike(
-                        1, brand, model, serial, date, source
+                        1,
+                        currentUser.getUId(),
+                        brand, 
+                        model, 
+                        serial,
+                        date,
+                        source
                 );
 
                 databaseManager.insertLopottBicikli(stolenBike);
