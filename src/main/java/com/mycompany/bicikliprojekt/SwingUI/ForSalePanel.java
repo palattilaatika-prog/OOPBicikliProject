@@ -52,7 +52,8 @@ public class ForSalePanel extends JPanel {
         header.add(title, BorderLayout.WEST);
         header.add(addButton, BorderLayout.EAST);
 
-        cardsPanel = new JPanel(new GridLayout(0, 2, 20, 20));
+        cardsPanel = new JPanel();
+        cardsPanel.setLayout(new BoxLayout(cardsPanel, BoxLayout.Y_AXIS));
         cardsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         searchField.setToolTipText("Keresés márka, modell, típus vagy leírás alapján");
@@ -106,6 +107,7 @@ public class ForSalePanel extends JPanel {
                 .toLowerCase(Locale.ROOT);
 
         int count = 0;
+        JPanel currentRow = null;
 
         for (ForSaleBike bike : bikes) {
             String searchable = (
@@ -120,8 +122,24 @@ public class ForSalePanel extends JPanel {
                 continue;
             }
 
-            cardsPanel.add(createBikeCard(bike));
+            if (count % 2 == 0) {
+                currentRow = new JPanel(new GridLayout(1, 2, 20, 20));
+                currentRow.setOpaque(false);
+                currentRow.setAlignmentX(0.0f);
+                currentRow.setMaximumSize(
+                        new Dimension(Integer.MAX_VALUE, 360)
+                );
+                cardsPanel.add(currentRow);
+            }
+
+            currentRow.add(createBikeCard(bike));
             count++;
+        }
+
+        if (count % 2 != 0 && currentRow != null) {
+            JPanel emptySpace = new JPanel();
+            emptySpace.setOpaque(false);
+            currentRow.add(emptySpace);
         }
 
         resultCountLabel.setText("Találatok: " + count);
@@ -155,6 +173,7 @@ public class ForSalePanel extends JPanel {
                 BorderFactory.createLineBorder(new Color(215, 215, 215)),
                 new EmptyBorder(12, 12, 12, 12)
         ));
+        card.setPreferredSize(new Dimension(400, 350));
 
         JLabel imageLabel = new JLabel();
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);

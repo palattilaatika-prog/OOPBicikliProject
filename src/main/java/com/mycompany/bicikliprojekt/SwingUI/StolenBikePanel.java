@@ -31,7 +31,7 @@ public class StolenBikePanel extends JPanel {
     private final DataBaseManager databaseManager = new DataBaseManager();
 
     private final JTextField searchField = new JTextField(25);
-    private final JPanel cardsPanel = new JPanel(new GridLayout(0, 2, 16, 16));
+    private final JPanel cardsPanel = new JPanel();
     private final JLabel resultCountLabel = new JLabel();
 
     private List<StolenBike> stolenBikes = new ArrayList<>();
@@ -44,6 +44,7 @@ public class StolenBikePanel extends JPanel {
         // Fejléc
         JPanel headerPanel = new JPanel(new BorderLayout(12, 12));
         headerPanel.setOpaque(false);
+        cardsPanel.setLayout(new BoxLayout(cardsPanel, BoxLayout.Y_AXIS));
 
         JPanel titlePanel = new JPanel();
         titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
@@ -156,35 +157,48 @@ public class StolenBikePanel extends JPanel {
                 .toLowerCase(Locale.ROOT);
 
         int count = 0;
+        JPanel currentRow = null;
 
         for (StolenBike bike : stolenBikes) {
             if (bike == null) {
                 continue;
             }
 
-            String brand = safe(bike.getBrand());
-            String model = safe(bike.getModel());
-            String serial = safe(bike.getSerialNumber());
-            String date = safe(bike.getReportedDate());
-            String source = safe(bike.getSource());
-
             String searchable = (
-                    brand + " " + model + " " + serial
-                    + " " + date + " " + source
+                    safe(bike.getBrand()) + " "
+                    + safe(bike.getModel()) + " "
+                    + safe(bike.getSerialNumber()) + " "
+                    + safe(bike.getReportedDate()) + " "
+                    + safe(bike.getSource())
             ).toLowerCase(Locale.ROOT);
 
             if (!searchable.contains(query)) {
                 continue;
             }
 
-            cardsPanel.add(createBikeCard(bike));
+            if (count % 2 == 0) {
+                currentRow = new JPanel(new GridLayout(1, 2, 16, 16));
+                currentRow.setOpaque(false);
+                currentRow.setAlignmentX(0.0f);
+                currentRow.setMaximumSize(
+                        new Dimension(Integer.MAX_VALUE, 220)
+                );
+                cardsPanel.add(currentRow);
+            }
+
+            currentRow.add(createBikeCard(bike));
             count++;
+        }
+
+        if (count % 2 != 0 && currentRow != null) {
+            JPanel emptySpace = new JPanel();
+            emptySpace.setOpaque(false);
+            currentRow.add(emptySpace);
         }
 
         if (count == 0) {
             JPanel emptyPanel = new JPanel();
             emptyPanel.setOpaque(false);
-            emptyPanel.setLayout(new BoxLayout(emptyPanel, BoxLayout.Y_AXIS));
             emptyPanel.setBorder(new EmptyBorder(35, 15, 35, 15));
 
             String message = stolenBikes.isEmpty()
@@ -193,24 +207,14 @@ public class StolenBikePanel extends JPanel {
 
             JLabel emptyLabel = new JLabel(message);
             emptyLabel.setFont(new Font("SansSerif", Font.PLAIN, 15));
-            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-            emptyPanel.add(Box.createVerticalGlue());
             emptyPanel.add(emptyLabel);
-            emptyPanel.add(Box.createVerticalGlue());
-
-            cardsPanel.setLayout(new BorderLayout());
-            cardsPanel.add(emptyPanel, BorderLayout.CENTER);
-        } else {
-            cardsPanel.setLayout(new GridLayout(0, 2, 16, 16));
+            cardsPanel.add(emptyPanel);
         }
 
         resultCountLabel.setText("Találatok: " + count);
-
         cardsPanel.revalidate();
         cardsPanel.repaint();
     }
-    
     private boolean isReporter(StolenBike bike) {
         User currentUser = SessionManager.getCurrentUser();
 
@@ -223,13 +227,13 @@ public class StolenBikePanel extends JPanel {
         card.setLayout(new BorderLayout(10, 12));
         card.setBackground(Color.WHITE);
         card.setBorder(new EmptyBorder(16, 16, 16, 16));
-        // Ikon: egyelőre nincs képmező a meglévő StolenBike modellben.
+        card.setPreferredSize(new Dimension(460, 205));
         JLabel icon = new JLabel(new BikeIcon(75, 75));
         icon.setPreferredSize(new Dimension(75, 75));
 
         JPanel iconPanel = new JPanel(new BorderLayout());
         iconPanel.setOpaque(false);
-        iconPanel.add(icon, BorderLayout.CENTER);
+        iconPanel.add(icon, BorderLayout.NORTH);
         iconPanel.setPreferredSize(new Dimension(75, 75));
 
         JLabel name = new JLabel(
