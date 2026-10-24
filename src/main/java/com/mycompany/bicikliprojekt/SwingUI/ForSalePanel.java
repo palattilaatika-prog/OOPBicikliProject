@@ -291,16 +291,57 @@ public class ForSalePanel extends JPanel {
         }
 
         Bike[] options = userBikes.toArray(new Bike[0]);
+        JComboBox<Bike> bikeComboBox = new JComboBox<>(options);
+        bikeComboBox.setMaximumRowCount(8);
 
-        Bike selectedBike = (Bike) JOptionPane.showInputDialog(
-                this,
-                "Válaszd ki, melyik kerékpárt szeretnéd eladni:",
-                "Kerékpár kiválasztása",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                options,
-                options[0]
+        bikeComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                    JList<?> list,
+                    Object value,
+                    int index,
+                    boolean isSelected,
+                    boolean cellHasFocus) {
+
+                JLabel label = (JLabel) super.getListCellRendererComponent(
+                        list, value, index, isSelected, cellHasFocus
+                );
+
+                if (value instanceof Bike) {
+                    Bike bike = (Bike) value;
+                    label.setText(
+                            safe(bike.getBrand()) + " "
+                            + safe(bike.getModel()) + " | "
+                            + safe(bike.getType()) + " | Vázszám: "
+                            + safe(bike.getSerialNumber())
+                    );
+                }
+
+                return label;
+            }
+        });
+
+        JPanel choicePanel = new JPanel(new BorderLayout(0, 10));
+        choicePanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        choicePanel.add(
+                new JLabel("Válaszd ki az eladni kívánt kerékpárt:"),
+                BorderLayout.NORTH
         );
+        choicePanel.add(bikeComboBox, BorderLayout.CENTER);
+
+        int choice = JOptionPane.showConfirmDialog(
+                this,
+                choicePanel,
+                "Kerékpár kiválasztása",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (choice != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        Bike selectedBike = (Bike) bikeComboBox.getSelectedItem();
 
         if (selectedBike == null) {
             return;

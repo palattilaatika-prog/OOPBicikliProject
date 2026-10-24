@@ -101,6 +101,9 @@ public class StolenBikePanel extends JPanel {
         cardsPanel.setBorder(new EmptyBorder(8, 2, 8, 2));
 
         JScrollPane scrollPane = new JScrollPane(cardsPanel);
+        scrollPane.setHorizontalScrollBarPolicy(
+        JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setOpaque(false);
         scrollPane.setOpaque(false);
@@ -224,17 +227,18 @@ public class StolenBikePanel extends JPanel {
 
     private JPanel createBikeCard(StolenBike bike) {
         JPanel card = new RoundedPanel(18);
-        card.setLayout(new BorderLayout(10, 12));
+        card.setLayout(new BorderLayout(0, 10));
         card.setBackground(Color.WHITE);
-        card.setBorder(new EmptyBorder(16, 16, 16, 16));
-        card.setPreferredSize(new Dimension(460, 205));
-        JLabel icon = new JLabel(new BikeIcon(75, 75));
-        icon.setPreferredSize(new Dimension(75, 75));
+        card.setBorder(new EmptyBorder(14, 14, 14, 14));
+        card.setPreferredSize(new Dimension(320, 300));
 
-        JPanel iconPanel = new JPanel(new BorderLayout());
-        iconPanel.setOpaque(false);
-        iconPanel.add(icon, BorderLayout.NORTH);
-        iconPanel.setPreferredSize(new Dimension(75, 75));
+        JLabel icon = new JLabel(new BikeIcon(170, 105));
+        icon.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JPanel imagePanel = new JPanel(new BorderLayout());
+        imagePanel.setOpaque(false);
+        imagePanel.setPreferredSize(new Dimension(280, 110));
+        imagePanel.add(icon, BorderLayout.CENTER);
 
         JLabel name = new JLabel(
                 safe(bike.getBrand()) + " " + safe(bike.getModel())
@@ -244,11 +248,12 @@ public class StolenBikePanel extends JPanel {
         JLabel serial = new JLabel(
                 "Vázszám: " + safe(bike.getSerialNumber())
         );
-        serial.setFont(new Font("SansSerif", Font.PLAIN, 12));
 
         JLabel date = new JLabel(
                 "Bejelentve: " + safe(bike.getReportedDate())
         );
+        date.setForeground(new Color(95, 105, 120));
+
         User reporter = databaseManager.getUserById(bike.getReporterUserId());
 
         String phoneNumber = reporter == null
@@ -257,27 +262,20 @@ public class StolenBikePanel extends JPanel {
                 ? "Nincs megadva"
                 : reporter.getPhoneNumber();
 
-        JLabel phone = new JLabel("Bejelentő telefonszáma: " + phoneNumber);
-        phone.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        
-        date.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        date.setForeground(new Color(95, 105, 120));
+        JLabel phone = new JLabel(
+                "Bejelentő telefonszáma: " + phoneNumber
+        );
 
         JPanel details = new JPanel();
         details.setOpaque(false);
         details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
         details.add(name);
-        details.add(Box.createVerticalStrut(9));
+        details.add(Box.createVerticalStrut(6));
         details.add(serial);
-        details.add(Box.createVerticalStrut(5));
+        details.add(Box.createVerticalStrut(4));
         details.add(date);
-        details.add(Box.createVerticalStrut(5));
+        details.add(Box.createVerticalStrut(4));
         details.add(phone);
-
-        JPanel top = new JPanel(new BorderLayout(12, 0));
-        top.setOpaque(false);
-        top.add(iconPanel, BorderLayout.WEST);
-        top.add(details, BorderLayout.CENTER);
 
         JButton detailsButton = new StyledButton(
                 "Részletek",
@@ -286,22 +284,23 @@ public class StolenBikePanel extends JPanel {
         );
         detailsButton.addActionListener(e -> showBikeDetails(bike));
 
-        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        bottom.setOpaque(false);
-        bottom.add(detailsButton);
-        
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        buttons.setOpaque(false);
+        buttons.add(detailsButton);
+
         if (isReporter(bike)) {
             JButton deleteButton = new StyledButton(
-                    "Saját bejelentés törlése",
+                    "Törlés",
                     new Color(250, 235, 235),
                     new Color(200, 55, 55)
             );
             deleteButton.addActionListener(e -> deleteStolenBike(bike));
-            bottom.add(deleteButton);
+            buttons.add(deleteButton);
         }
 
-        card.add(top, BorderLayout.CENTER);
-        card.add(bottom, BorderLayout.SOUTH);
+        card.add(imagePanel, BorderLayout.NORTH);
+        card.add(details, BorderLayout.CENTER);
+        card.add(buttons, BorderLayout.SOUTH);
 
         return card;
     }
