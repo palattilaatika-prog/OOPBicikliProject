@@ -12,6 +12,7 @@ import javax.swing.SwingConstants;
 
 import com.mycompany.bicikliprojekt.SwingUI.ProfilePanel;
 import com.mycompany.bicikliprojekt.SwingUI.ForSalePanel;
+import com.mycompany.bicikliprojekt.SwingUI.StolenBikePanel;
 
 /**
  *
@@ -28,7 +29,7 @@ public class ContentPanel extends JPanel {
 
         pages.add(new ProfilePanel(), "Profil");
         pages.add(new ForSalePanel(), "Eladó kerékpárok");
-        pages.add(createPlaceholder("Ellopott kerékpárok"), "Ellopott kerékpárok");
+        pages.add(new StolenBikePanel(), "Ellopott kerékpárok");
         pages.add(createPlaceholder("Kerékpáros hírek"), "Hírek");
 
         setLayout(new BorderLayout());
