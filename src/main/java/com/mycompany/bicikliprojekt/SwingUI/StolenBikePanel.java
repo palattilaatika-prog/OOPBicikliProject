@@ -468,7 +468,7 @@ public class StolenBikePanel extends JPanel {
 
             try {
                 StolenBike stolenBike = new StolenBike(
-                        0, brand, model, serial, date, source
+                        1, brand, model, serial, date, source
                 );
 
                 databaseManager.insertLopottBicikli(stolenBike);

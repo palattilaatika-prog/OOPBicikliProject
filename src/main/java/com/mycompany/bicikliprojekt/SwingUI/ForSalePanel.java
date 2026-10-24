@@ -22,6 +22,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.io.File;
+import java.util.Locale;
 
 /**
  *
@@ -31,6 +32,8 @@ public class ForSalePanel extends JPanel {
     private final JPanel cardsPanel;
     private final DataBaseManager databaseManager = new DataBaseManager();
     private final ArrayList<ForSaleBike> bikes = new ArrayList<>();
+    private final JTextField searchField = new JTextField(24);
+    private final JLabel resultCountLabel = new JLabel();
 
     public ForSalePanel() {
         setLayout(new BorderLayout(15, 15));
@@ -52,37 +55,80 @@ public class ForSalePanel extends JPanel {
         cardsPanel = new JPanel(new GridLayout(0, 2, 20, 20));
         cardsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
+        searchField.setToolTipText("Keresés márka, modell, típus vagy leírás alapján");
+        searchField.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        JButton searchButton = new StyledButton(
+                "Keresés",
+                new Color(235, 242, 237),
+                new Color(35, 125, 85)
+        );
+        searchButton.addActionListener(e -> refreshCards());
+        searchField.addActionListener(e -> refreshCards());
+
+        JPanel searchPanel = new JPanel(new BorderLayout(10, 0));
+        searchPanel.setOpaque(false);
+        searchPanel.add(new JLabel("Keresés:"), BorderLayout.WEST);
+        searchPanel.add(searchField, BorderLayout.CENTER);
+        searchPanel.add(searchButton, BorderLayout.EAST);
+
+
         JScrollPane scrollPane = new JScrollPane(cardsPanel);
         scrollPane.setBorder(null);
-
-        scrollPane.getVerticalScrollBar().setUI(
-                new ScrollBar()
-        );
-        scrollPane.getHorizontalScrollBar().setUI(
-                new ScrollBar()
-        );
-
+        scrollPane.getVerticalScrollBar().setUI(new ScrollBar());
+        scrollPane.getHorizontalScrollBar().setUI(new ScrollBar());
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         scrollPane.getHorizontalScrollBar().setUnitIncrement(16);
 
+        resultCountLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        resultCountLabel.setForeground(new Color(95, 105, 120));
+
+        JPanel centerPanel = new JPanel(new BorderLayout(0, 8));
+        centerPanel.add(searchPanel, BorderLayout.NORTH);
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
+        centerPanel.add(resultCountLabel, BorderLayout.SOUTH);
+
         add(header, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
         addButton.addActionListener(e -> addBike());
 
         loadBikes();
+    }
+    private String safe(String value) {
+        return value == null ? "" : value;
     }
 
     private void refreshCards() {
         cardsPanel.removeAll();
 
+        String query = searchField.getText()
+                .trim()
+                .toLowerCase(Locale.ROOT);
+
+        int count = 0;
+
         for (ForSaleBike bike : bikes) {
+            String searchable = (
+                    safe(bike.getBrand()) + " "
+                    + safe(bike.getModel()) + " "
+                    + safe(bike.getType()) + " "
+                    + safe(bike.getCondition()) + " "
+                    + safe(bike.getDescription())
+            ).toLowerCase(Locale.ROOT);
+
+            if (!searchable.contains(query)) {
+                continue;
+            }
+
             cardsPanel.add(createBikeCard(bike));
+            count++;
         }
 
+        resultCountLabel.setText("Találatok: " + count);
         cardsPanel.revalidate();
         cardsPanel.repaint();
     }
-    
+
     private void loadBikes() {
     try {
         bikes.clear();
