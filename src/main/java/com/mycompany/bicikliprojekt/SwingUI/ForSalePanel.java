@@ -7,6 +7,13 @@ package com.mycompany.bicikliprojekt.SwingUI;
 import com.mycompany.bicikliprojekt.SwingUI.components.BikeIcon;
 import com.mycompany.bicikliprojekt.SwingUI.components.ScrollBar;
 import com.mycompany.bicikliprojekt.SwingUI.components.StyledButton;
+import com.mycompany.bicikliprojekt.DataBase.DataBaseManager;
+import com.mycompany.bicikliprojekt.model.ForSaleBike;
+import com.mycompany.bicikliprojekt.model.User;
+import com.mycompany.bicikliprojekt.services.SessionManager;
+import com.mycompany.bicikliprojekt.model.Bike;
+import java.time.LocalDate;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -22,7 +29,8 @@ import java.io.File;
  */
 public class ForSalePanel extends JPanel {
     private final JPanel cardsPanel;
-    private final ArrayList<Bike> bikes = new ArrayList<>();
+    private final DataBaseManager databaseManager = new DataBaseManager();
+    private final ArrayList<ForSaleBike> bikes = new ArrayList<>();
 
     public ForSalePanel() {
         setLayout(new BorderLayout(15, 15));
@@ -59,56 +67,34 @@ public class ForSalePanel extends JPanel {
 
         add(header, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
-
-        // Ideiglenes próbaadatok
-        bikes.add(new Bike(
-            "Trek", 
-            "Marlin 5",
-            "MTB",
-            "Használt",
-            1800,
-            "Megbízható hegyikerékpár, jó állapotban.",
-            null
-        ));
-        bikes.add(new Bike(
-                "Trek", "Marlin 5", "MTB",
-                "Használt", 1800,
-                "Megbízható hegyikerékpár, jó állapotban.",
-                null
-        ));
-
-        bikes.add(new Bike(
-                "Giant", "Escape 3", "Városi",
-                "Újszerű", 1200,
-                "Kényelmes kerékpár városi használatra.",
-                null
-        ));
-
-        bikes.add(new Bike(
-                "Merida", "Dual Thrust", "MTN",
-                "Használt", 950,
-                "Kedvező árú kerékpár mindennapi használatra.",
-                null
-        ));
-        
-
         addButton.addActionListener(e -> addBike());
 
-        refreshCards();
+        loadBikes();
     }
 
     private void refreshCards() {
         cardsPanel.removeAll();
 
-        for (Bike bike : bikes) {
+        for (ForSaleBike bike : bikes) {
             cardsPanel.add(createBikeCard(bike));
         }
 
         cardsPanel.revalidate();
         cardsPanel.repaint();
     }
+    
+    private void loadBikes() {
+    try {
+        bikes.clear();
+        bikes.addAll(databaseManager.getAllEladoBicikli());
+        refreshCards();
+    } catch (Exception ex) {
+        showError("Nem sikerült betölteni az eladó kerékpárokat: "
+                + ex.getMessage());
+    }
+    }
 
-    private JPanel createBikeCard(Bike bike) {
+    private JPanel createBikeCard(ForSaleBike bike) {
         JPanel card = new JPanel(new BorderLayout(8, 8));
         card.setBackground(Color.WHITE);
 
@@ -123,10 +109,12 @@ public class ForSalePanel extends JPanel {
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         imageLabel.setPreferredSize(new Dimension(200, 140));
 
-        if (bike.imagePath != null
-                && new File(bike.imagePath).isFile()) {
+        String imagePath = bike.getImagePath();
 
-            ImageIcon original = new ImageIcon(bike.imagePath);
+        if (imagePath != null
+            && !imagePath.isBlank()
+            && new File(imagePath).isFile()) {
+            ImageIcon original = new ImageIcon(imagePath);
 
             Image scaled = original.getImage().getScaledInstance(
                     160, 120, Image.SCALE_SMOOTH
@@ -142,19 +130,20 @@ public class ForSalePanel extends JPanel {
         details.setOpaque(false);
         details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
 
-        JLabel name = new JLabel(bike.brand + " " + bike.model);
+        JLabel name = new JLabel(bike.getBrand() + " " + bike.getModel());
         name.setFont(new Font("SansSerif", Font.BOLD, 17));
 
-        JLabel type = new JLabel("Típus: " + bike.type);
-        JLabel condition = new JLabel("Állapot: " + bike.condition);
-
+        JLabel type = new JLabel("Típus: " + bike.getType());
+        JLabel condition = new JLabel("Állapot: " + bike.getCondition());
         JLabel price = new JLabel(
-                String.format("%,.0f lej", bike.price)
+                String.format("%,.0f lej", bike.getPrice())
         );
         price.setFont(new Font("SansSerif", Font.BOLD, 20));
         price.setForeground(new Color(35, 125, 75));
 
-        JTextArea description = new JTextArea(bike.description);
+        JTextArea description = new JTextArea(
+        bike.getDescription() == null ? "" : bike.getDescription()
+        );
         description.setLineWrap(true);
         description.setWrapStyleWord(true);
         description.setEditable(false);
@@ -204,31 +193,98 @@ public class ForSalePanel extends JPanel {
     }
 
     private void addBike() {
-        Bike bike = showBikeDialog(null);
+        User currentUser = SessionManager.getCurrentUser();
 
-        if (bike != null) {
-            bikes.add(bike);
-            refreshCards();
+        if (currentUser == null) {
+            showError("Hirdetés feladásához be kell jelentkezned!");
+            return;
+        }
+
+        List<Bike> userBikes =
+                databaseManager.getBikesByUserId(currentUser.getUId());
+
+        if (userBikes == null || userBikes.isEmpty()) {
+            showError("Először adj hozzá kerékpárt a saját kerékpárjaidhoz!");
+            return;
+        }
+
+        Bike[] options = userBikes.toArray(new Bike[0]);
+
+        Bike selectedBike = (Bike) JOptionPane.showInputDialog(
+                this,
+                "Válaszd ki, melyik kerékpárt szeretnéd eladni:",
+                "Kerékpár kiválasztása",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        if (selectedBike == null) {
+            return;
+        }
+
+        ListingDetails details = showBikeDialog(null, selectedBike);
+
+        if (details == null) {
+            return;
+        }
+        
+        for (ForSaleBike listedBike : bikes) {
+            if (listedBike.getBikeId() == selectedBike.getBicikliid()) {
+                showError("Ez a kerékpár már szerepel az eladó hirdetések között.");
+                return;
+            }
+        }
+
+        try {
+            ForSaleBike listing = new ForSaleBike(
+                    1, 
+                    currentUser.getUId(),
+                    selectedBike.getBrand(),
+                    selectedBike.getModel(),
+                    selectedBike.getType(),
+                    selectedBike.getSerialNumber(),
+                    selectedBike.getBicikliid(),
+                    details.condition,
+                    details.price,
+                    details.imagePath,
+                    details.description,
+                    LocalDate.now().toString()
+            );
+
+            databaseManager.insertEladoBicikli(listing);
+            loadBikes();
+
+        } catch (Exception ex) {
+            showError("Nem sikerült elmenteni a hirdetést: "
+                    + ex.getMessage());
         }
     }
 
-    private void editBike(Bike bike) {
-        Bike edited = showBikeDialog(bike);
+    private void editBike(ForSaleBike bike) {
+    ListingDetails edited = showBikeDialog(bike, null);
 
-        if (edited != null) {
-            bike.brand = edited.brand;
-            bike.model = edited.model;
-            bike.type = edited.type;
-            bike.condition = edited.condition;
-            bike.price = edited.price;
-            bike.description = edited.description;
-            bike.imagePath = edited.imagePath;
-
-            refreshCards();
-        }
+    if (edited == null) {
+        return;
     }
 
-    private void deleteBike(Bike bike) {
+    try {
+        bike.setCondition(edited.condition);
+        bike.setPrice(edited.price);
+        bike.setImagePath(edited.imagePath);
+        bike.setDescription(edited.description);
+
+        databaseManager.updateEladoBicikli(bike);
+        loadBikes();
+
+    } catch (Exception ex) {
+        showError("Nem sikerült módosítani a hirdetést: "
+                + ex.getMessage());
+    }
+    }
+
+    private void deleteBike(ForSaleBike bike) {
         int answer = JOptionPane.showConfirmDialog(
                 this,
                 "Biztosan törlöd ezt a hirdetést?",
@@ -236,24 +292,37 @@ public class ForSalePanel extends JPanel {
                 JOptionPane.YES_NO_OPTION
         );
 
-        if (answer == JOptionPane.YES_OPTION) {
-            bikes.remove(bike);
-            refreshCards();
+        if (answer != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try {
+            databaseManager.deleteEladoBicikliById(bike.getBicikliid());
+            loadBikes();
+
+        } catch (Exception ex) {
+            showError("Nem sikerült törölni a hirdetést: "
+                    + ex.getMessage());
         }
     }
 
-    private Bike showBikeDialog(Bike existing) {
+    private ListingDetails showBikeDialog(ForSaleBike existing, Bike selectedBike) {
+        
         JTextField brandField = new JTextField(
-                existing == null ? "" : existing.brand
-        );
+        selectedBike != null ? selectedBike.getBrand()
+                : existing != null ? existing.getBrand() : "");
 
         JTextField modelField = new JTextField(
-                existing == null ? "" : existing.model
-        );
+                selectedBike != null ? selectedBike.getModel()
+                        : existing != null ? existing.getModel() : "");
 
         JTextField typeField = new JTextField(
-                existing == null ? "" : existing.type
-        );
+                selectedBike != null ? selectedBike.getType()
+                        : existing != null ? existing.getType() : "");
+        
+        brandField.setEditable(false);
+        modelField.setEditable(false);
+        typeField.setEditable(false);
 
         String[] conditions = {
             "Új", "Újszerű", "Használt", "Felújítandó"
@@ -271,15 +340,15 @@ public class ForSalePanel extends JPanel {
         );
 
         JTextField priceField = new JTextField(
-                existing == null ? "" : String.valueOf(existing.price)
+                existing == null ? "" : String.valueOf(existing.getPrice())
         );
 
         JTextArea descriptionArea = new JTextArea(
-                existing == null ? "" : existing.description,
+                existing == null ? "" : existing.getDescription(),
                 4, 20
         );
         String[] selectedImage = {
-    existing == null ? null : existing.imagePath};
+        existing == null ? null : existing.getImagePath()};
 
         JLabel imageStatus = new JLabel(
                 selectedImage[0] == null
@@ -342,7 +411,7 @@ public class ForSalePanel extends JPanel {
         imagePanel.add(imageStatus);
 
         if (existing != null) {
-            conditionBox.setSelectedItem(existing.condition);
+            conditionBox.setSelectedItem(existing.getCondition());
         }
         
         Color fieldBorderColor = new Color(215, 225, 219);
@@ -464,8 +533,8 @@ public class ForSalePanel extends JPanel {
             return null;
         }
 
-        return new Bike(
-                brand, model, type, condition, price, description, selectedImage[0]
+        return new ListingDetails(
+            condition, price, description, selectedImage[0]
         );
     }
 
@@ -478,27 +547,17 @@ public class ForSalePanel extends JPanel {
         );
     }
 
-    private static class Bike {
-        private String brand;
-        private String model;
-        private String type;
-        private String condition;
-        private double price;
-        private String description;
-        private String imagePath;
+    private static class ListingDetails {
+    private final String condition;
+    private final double price;
+    private final String description;
+    private final String imagePath;
 
-        private Bike(
-                String brand,
-                String model,
-                String type,
+        private ListingDetails(
                 String condition,
                 double price,
                 String description,
                 String imagePath) {
-
-            this.brand = brand;
-            this.model = model;
-            this.type = type;
             this.condition = condition;
             this.price = price;
             this.description = description;
@@ -506,5 +565,3 @@ public class ForSalePanel extends JPanel {
         }
     }
 }
-
-    
