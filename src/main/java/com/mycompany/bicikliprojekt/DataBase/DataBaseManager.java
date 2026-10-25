@@ -116,9 +116,9 @@ public class DataBaseManager implements AuthService{
     }
 
     public void insertLopottBicikli(StolenBike bike) {
-        String sql = "INSERT INTO stolen_bikes"
-                + "(serialNumber, brand, model, reportedDate, source, reporterUserId) "
-                + "VALUES(?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO stolen_bikes "
+                + "(serialNumber, brand, model, reportedDate, source, reporterUserId, imagePath) "
+                + "VALUES(?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -129,6 +129,7 @@ public class DataBaseManager implements AuthService{
             pstmt.setString(4, bike.getReportedDate());
             pstmt.setString(5, bike.getSource());
             pstmt.setInt(6, bike.getReporterUserId());
+            pstmt.setString(7, bike.getImagePath());
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -214,7 +215,8 @@ public class DataBaseManager implements AuthService{
                    rs.getString("model"),
                    rs.getString("serialNumber"),
                    rs.getString("reportedDate"),
-                   rs.getString("source")
+                   rs.getString("source"),
+                   rs.getString("imagePath")
                 );
                 stolenBikes.add(bike);
             }
@@ -365,7 +367,8 @@ public class DataBaseManager implements AuthService{
                     rs.getString("model"),
                     rs.getString("serialNumber"),
                     rs.getString("reportedDate"),
-                    rs.getString("source")
+                    rs.getString("source"),
+                    rs.getString("imagePath")    
             );
             }
 
@@ -394,7 +397,8 @@ public class DataBaseManager implements AuthService{
                         rs.getString("model"),
                         rs.getString("serialNumber"),
                         rs.getString("reportedDate"),
-                        rs.getString("source")
+                        rs.getString("source"),
+                        rs.getString("imagePath")
                 );
                 result.add(bike);
             }

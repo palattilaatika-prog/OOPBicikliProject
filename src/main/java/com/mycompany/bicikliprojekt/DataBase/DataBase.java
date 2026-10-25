@@ -60,7 +60,8 @@ public class DataBase {
                 + "model TEXT NOT NULL, "
                 + "reportedDate TEXT NOT NULL, "
                 + "source TEXT NOT NULL, "
-                + "reporterUserId INTEGER"
+                + "reporterUserId INTEGER,"
+                + "imagePath TEXT"
                 + ");";
 
         try (Connection conn = getConnection();
@@ -100,7 +101,22 @@ public class DataBase {
         if (!hasReporterUserId) {
             stmt.execute("ALTER TABLE stolen_bikes ADD COLUMN reporterUserId INTEGER");
         }
+        
+        boolean hasImagePath = false;
 
+        try (ResultSet columns = stmt.executeQuery("PRAGMA table_info(stolen_bikes)")) {
+            while (columns.next()) {
+                if ("imagePath".equalsIgnoreCase(columns.getString("name"))) {
+                    hasImagePath = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasImagePath) {
+            stmt.execute("ALTER TABLE stolen_bikes ADD COLUMN imagePath TEXT");
+        }
+        
             System.out.println("Database tables initialized successfully.");
 
         } catch (SQLException e) {

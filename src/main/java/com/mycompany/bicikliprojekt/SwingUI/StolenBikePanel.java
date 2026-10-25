@@ -299,8 +299,33 @@ public class StolenBikePanel extends JPanel {
         card.setBorder(new EmptyBorder(14, 14, 14, 14));
         card.setPreferredSize(new Dimension(320, 300));
 
-        JLabel icon = new JLabel(new BikeIcon(170, 105));
+        JLabel icon = new JLabel();
         icon.setHorizontalAlignment(SwingConstants.CENTER);
+
+        String imagePath = bike.getImagePath();
+        ImageIcon selectedImage = imagePath == null || imagePath.isBlank()
+                ? null
+                : new ImageIcon(imagePath);
+
+        if (selectedImage != null && selectedImage.getIconWidth() > 0) {
+            double scale = Math.min(
+                    170.0 / selectedImage.getIconWidth(),
+                    105.0 / selectedImage.getIconHeight()
+            );
+
+            int imageWidth = (int) (selectedImage.getIconWidth() * scale);
+            int imageHeight = (int) (selectedImage.getIconHeight() * scale);
+
+            Image scaledImage = selectedImage.getImage().getScaledInstance(
+                    imageWidth,
+                    imageHeight,
+                    Image.SCALE_SMOOTH
+            );
+
+            icon.setIcon(new ImageIcon(scaledImage));
+        } else {
+            icon.setIcon(new BikeIcon(170, 105));
+        }
 
         JPanel imagePanel = new JPanel(new BorderLayout());
         imagePanel.setOpaque(false);
@@ -485,6 +510,29 @@ public class StolenBikePanel extends JPanel {
         JTextField dateField = new JTextField(LocalDate.now().toString(), 22);
         JTextField sourceField = new JTextField(22);
         
+        JTextField imagePathField = new JTextField(22);
+        imagePathField.setEditable(false);
+
+        JButton chooseImageButton = new StyledButton(
+                "Kép kiválasztása",
+                new Color(235, 242, 237),
+                new Color(35, 125, 85)
+        );
+
+        chooseImageButton.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Válassz képet a kerékpárhoz");
+            chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+                    "Képfájlok", "jpg", "jpeg", "png", "gif"
+            ));
+
+            if (chooser.showOpenDialog(dialog) == JFileChooser.APPROVE_OPTION) {
+                imagePathField.setText(
+                        chooser.getSelectedFile().getAbsolutePath()
+                );
+            }
+        });
+        
         Color fieldBorderColor = new Color(215, 225, 219);
 
         JTextField[] dialogFields = {
@@ -531,6 +579,13 @@ public class StolenBikePanel extends JPanel {
         addFormRow(form, gbc, row++, "Vázszám:", serialField);
         addFormRow(form, gbc, row++, "Dátum (ÉÉÉÉ-HH-NN):", dateField);
         addFormRow(form, gbc, row++, "Bejelentés forrása:", sourceField);
+        
+        JPanel imagePanel = new JPanel(new BorderLayout(8, 0));
+        imagePanel.setOpaque(false);
+        imagePanel.add(imagePathField, BorderLayout.CENTER);
+        imagePanel.add(chooseImageButton, BorderLayout.EAST);
+
+        addFormRow(form, gbc, row++, "Kerékpár képe:", imagePanel);
 
         Runnable fillSelectedBike = () -> {
             if (!ownBikeButton.isSelected()) {
@@ -649,7 +704,8 @@ public class StolenBikePanel extends JPanel {
                         model, 
                         serial,
                         date,
-                        source
+                        source,
+                        imagePathField.getText()
                 );
 
                 databaseManager.insertLopottBicikli(stolenBike);

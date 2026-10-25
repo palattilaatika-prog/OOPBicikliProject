@@ -12,6 +12,7 @@ public class StolenBike extends BaseBike {
     private String reportedDate;
     private String source;
     private int reporterUserId;
+    private String imagePath;
 
     public StolenBike(
             int id,
@@ -21,8 +22,9 @@ public class StolenBike extends BaseBike {
             String reportedDate,
             String source
     ) {
-        this(id, 0, brand, model, serialNumber, reportedDate, source);
+        this(id, 0, brand, model, serialNumber, reportedDate, source, null);
     }
+
     public StolenBike(
             int id,
             int reporterUserId,
@@ -32,10 +34,24 @@ public class StolenBike extends BaseBike {
             String reportedDate,
             String source
     ) {
+        this(id, reporterUserId, brand, model, serialNumber, reportedDate, source, null);
+    }
+
+    public StolenBike(
+            int id,
+            int reporterUserId,
+            String brand,
+            String model,
+            String serialNumber,
+            String reportedDate,
+            String source,
+            String imagePath
+    ) {
         super(id, brand, model, serialNumber);
         setReportedDate(reportedDate);
         setSource(source);
         this.reporterUserId = reporterUserId;
+        setImagePath(imagePath);
     }
 
     public String getReportedDate() {
@@ -50,6 +66,10 @@ public class StolenBike extends BaseBike {
         return reporterUserId;
     }
 
+    public String getImagePath() {
+        return imagePath;
+    }
+
     public void setReportedDate(String reportedDate) {
         if (reportedDate == null || reportedDate.trim().isEmpty()) {
             throw new IllegalArgumentException("Reported date cannot be empty.");
@@ -62,5 +82,9 @@ public class StolenBike extends BaseBike {
             throw new IllegalArgumentException("Source cannot be empty.");
         }
         this.source = source.trim();
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath == null ? "" : imagePath.trim();
     }
 }
