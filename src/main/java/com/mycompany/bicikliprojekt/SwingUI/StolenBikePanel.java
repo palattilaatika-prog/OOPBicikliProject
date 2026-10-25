@@ -21,6 +21,12 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 /**
  *
@@ -102,11 +108,72 @@ public class StolenBikePanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(cardsPanel);
         scrollPane.setHorizontalScrollBarPolicy(
-        JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        );
+        scrollPane.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
         );
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setOpaque(false);
         scrollPane.setOpaque(false);
+
+        scrollPane.getVerticalScrollBar().setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors() {
+                thumbColor = new Color(137, 168, 154);
+                trackColor = new Color(240, 245, 242);
+            }
+
+            @Override
+            protected JButton createDecreaseButton(int orientation) {
+                return new JButton() {
+                    @Override
+                    public Dimension getPreferredSize() {
+                        return new Dimension(0, 0);
+                    }
+                };
+            }
+
+            @Override
+            protected JButton createIncreaseButton(int orientation) {
+                return new JButton() {
+                    @Override
+                    public Dimension getPreferredSize() {
+                        return new Dimension(0, 0);
+                    }
+                };
+            }
+
+            @Override
+            protected void paintTrack(Graphics graphics, JComponent component, Rectangle bounds) {
+                Graphics2D g = (Graphics2D) graphics.create();
+                g.setColor(trackColor);
+                g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+                g.dispose();
+            }
+
+            @Override
+            protected void paintThumb(Graphics graphics, JComponent component, Rectangle bounds) {
+                if (bounds.isEmpty() || !scrollbar.isEnabled()) {
+                    return;
+                }
+
+                Graphics2D g = (Graphics2D) graphics.create();
+                g.setRenderingHint(
+                        RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON
+                );
+                g.setColor(thumbColor);
+                g.fillRoundRect(
+                        bounds.x + 3, bounds.y + 2,
+                        bounds.width - 6, bounds.height - 4,
+                        10, 10
+                );
+                g.dispose();
+            }
+        });
+
+        scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(12, 0));
         scrollPane.getVerticalScrollBar().setUnitIncrement(18);
 
         JPanel centerPanel = new JPanel(new BorderLayout(0, 8));
