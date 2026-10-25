@@ -11,6 +11,7 @@ import javax.swing.UIManager;
 import com.mycompany.bicikliprojekt.DataBase.DataBase;
 import com.mycompany.bicikliprojekt.SwingUI.components.ContentPanel;
 import com.mycompany.bicikliprojekt.SwingUI.components.SidebarPanel;
+import com.mycompany.bicikliprojekt.DataBase.DataBaseManager;
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
@@ -103,6 +104,9 @@ public class MainWindow extends JFrame{
        SwingUtilities.invokeLater(() -> {
         applyDialogTheme();
         DataBase.createTables();
+        DataBaseManager manager = new DataBaseManager();
+        manager.insertTestBikes();
+        manager.correctTestBikeImageExtensions();
 
         LoginDialog loginDialog = new LoginDialog(null);
 

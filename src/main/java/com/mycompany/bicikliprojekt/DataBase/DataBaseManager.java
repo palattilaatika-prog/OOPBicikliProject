@@ -573,4 +573,73 @@ public class DataBaseManager implements AuthService{
             System.err.println("Error deleting stolen bike record: " + e.getMessage());
         }
     }
+    public void insertTestBikes() {
+        String[][] testBikes = {
+            {"tesztelek123@gmail.com", "Trek", "Marlin 7", "MTB", "TESTBIKE001", "bike01.png"},
+            {"tesztelek123@gmail.com", "Giant", "Trance 29", "MTB", "TESTBIKE002", "bike02.png"},
+            {"tesztelek123@gmail.com", "Specialized", "Allez", "Országúti", "TESTBIKE003", "bike03.png"},
+            {"tesztelek123@gmail.com", "Cannondale", "Topstone", "Gravel", "TESTBIKE004", "bike04.png"},
+            {"tesztelek123@gmail.com", "Cube", "Hyde", "Városi", "TESTBIKE005", "bike05.png"},
+
+            {"teszterik123@gmail.com", "Elops", "540", "Városi", "TESTBIKE006", "bike06.png"},
+            {"teszterik123@gmail.com", "Mongoose", "Legion L20", "BMX", "TESTBIKE007", "bike07.png"},
+            {"teszterik123@gmail.com", "Trek", "FX 2", "Hibrid", "TESTBIKE008", "bike08.png"},
+            {"teszterik123@gmail.com", "Kona", "Sutra", "Túra", "TESTBIKE009", "bike09.png"},
+            {"teszterik123@gmail.com", "Giant", "Explore E+", "Elektromos", "TESTBIKE010", "bike10.png"},
+
+            {"tesztike123@gmail.com", "Btwin", "Rockrider ST100", "Gyerek MTB", "TESTBIKE011", "bike11.png"},
+            {"tesztike123@gmail.com", "Gazelle", "Esprit", "Városi", "TESTBIKE012", "bike12.png"},
+            {"tesztike123@gmail.com", "Specialized", "Fuse", "Trail MTB", "TESTBIKE013", "bike13.png"},
+            {"tesztike123@gmail.com", "Dahon", "Mariner D8", "Összecsukható", "TESTBIKE014", "bike14.png"},
+            {"tesztike123@gmail.com", "Electra", "Cruiser 1", "Cruiser", "TESTBIKE015", "bike15.png"}
+        };
+
+        String sql = "INSERT INTO bikes "
+                + "(userId, brand, model, type, serialNumber, imagePath) "
+                + "SELECT id, ?, ?, ?, ?, ? FROM users WHERE email = ? "
+                + "AND NOT EXISTS ("
+                + "SELECT 1 FROM bikes existing "
+                + "WHERE existing.userId = users.id AND existing.serialNumber = ?"
+                + ")";
+
+        int inserted = 0;
+
+        try (Connection conn = DataBase.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            for (String[] bike : testBikes) {
+                pstmt.setString(1, bike[1]); // márka
+                pstmt.setString(2, bike[2]); // modell
+                pstmt.setString(3, bike[3]); // típus
+                pstmt.setString(4, bike[4]); // vázszám
+                pstmt.setString(5, "src/main/resources/bike-images/" + bike[5]);
+                pstmt.setString(6, bike[0]); // profil e-mail-címe
+                pstmt.setString(7, bike[4]); // ismétlés ellenőrzése
+
+                inserted += pstmt.executeUpdate();
+            }
+
+            System.out.println("Beszúrt tesztbiciklik: " + inserted);
+
+        } catch (SQLException e) {
+            System.err.println("Hiba a tesztbiciklik feltöltésekor: " + e.getMessage());
+        }
+        
+    }
+    public void correctTestBikeImageExtensions() {
+        String sql = "UPDATE bikes "
+                + "SET imagePath = REPLACE(imagePath, '.png', '.jpg') "
+                + "WHERE serialNumber LIKE 'TESTBIKE%' "
+                + "AND imagePath LIKE '%.png'";
+
+        try (Connection conn = DataBase.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            int updated = pstmt.executeUpdate();
+            System.out.println("Javított tesztképutak: " + updated);
+
+        } catch (SQLException e) {
+            System.err.println("Hiba a tesztképutak javításakor: " + e.getMessage());
+        }
+    }
 }
