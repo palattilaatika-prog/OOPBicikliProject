@@ -11,28 +11,61 @@ package com.mycompany.bicikliprojekt.model;
 public class Bike extends BaseBike {
     private int userId;
     private String type;
+    private String imagePath;
 
-    public Bike ( int id, int userId, String brand, String model, String type, String serialNumber) 
-    {
-        super(id, brand, model, serialNumber);
-        setUserId(userId);
-        setType(type);
-    }
-
-    public int getUserId() { return userId; }
-    public String getType() { return type; }
-
-    public void setUserId(int userId) {
-        if (userId <= 0) {
-            throw new IllegalArgumentException("User ID must be a positive integer.");
+        public Bike(
+                int id,
+                int userId,
+                String brand,
+                String model,
+                String type,
+                String serialNumber
+        ) {
+            this(id, userId, brand, model, type, serialNumber, null);
         }
-        this.userId = userId;
-    }
 
-    public void setType(String type) {
-        if (type == null || type.trim().isEmpty()) {
-            throw new IllegalArgumentException("Type cannot be empty or null.");
+        public Bike(
+                int id,
+                int userId,
+                String brand,
+                String model,
+                String type,
+                String serialNumber,
+                String imagePath
+        ) {
+            super(id, brand, model, serialNumber);
+            setUserId(userId);
+            setType(type);
+            setImagePath(imagePath);
         }
-        this.type = type.trim();
+
+        public int getUserId() {
+            return userId;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getImagePath() {
+            return imagePath;
+        }
+
+        public void setUserId(int userId) {
+            if (userId <= 0) {
+                throw new IllegalArgumentException("User ID must be positive.");
+            }
+            this.userId = userId;
+        }
+
+        public void setType(String type) {
+            if (type == null || type.trim().isEmpty()) {
+                throw new IllegalArgumentException("Type cannot be empty or null.");
+            }
+            this.type = type.trim();
+        }
+
+        public void setImagePath(String imagePath) {
+            this.imagePath = imagePath == null ? "" : imagePath.trim();
+        }
     }
-}

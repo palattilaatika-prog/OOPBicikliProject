@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +80,9 @@ public class DataBaseManager implements AuthService{
     }
 
     public void insertBicikli(Bike bike) {
-        String sql = "INSERT INTO bikes(userId, brand, model, type, serialNumber) VALUES(?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO bikes"
+                + "(userId, brand, model, type, serialNumber, imagePath) "
+                + "VALUES(?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -89,6 +92,7 @@ public class DataBaseManager implements AuthService{
             pstmt.setString(3, bike.getModel());
             pstmt.setString(4, bike.getType());
             pstmt.setString(5, bike.getSerialNumber());
+            pstmt.setString(6, bike.getImagePath());
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
@@ -138,27 +142,38 @@ public class DataBaseManager implements AuthService{
     }
     //adds stolenbikes 
     public void insertAllLopottBicikli(List<StolenBike> bikes) {
-        String sql = "INSERT INTO stolen_bikes"
-                + "(serialNumber, brand, model, reportedDate, source, reporterUserId) "
-                + "VALUES(?, ?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO stolen_bikes "
+                + "(serialNumber, brand, model, reportedDate, source, reporterUserId, imagePath) "
+                + "VALUES(?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = DataBase.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DataBase.getConnection()) {
+            conn.setAutoCommit(false);
 
-            for (StolenBike bike : bikes) {
-                pstmt.setString(1, bike.getSerialNumber());
-                pstmt.setString(2, bike.getBrand());
-                pstmt.setString(3, bike.getModel());
-                pstmt.setString(4, bike.getReportedDate());
-                pstmt.setString(5, bike.getSource());
-                pstmt.setInt(6, bike.getReporterUserId());
-                pstmt.addBatch();
+            try (Statement stmt = conn.createStatement();
+                 PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
+
+                stmt.executeUpdate("DELETE FROM stolen_bikes WHERE source = 'API'");
+
+                for (StolenBike bike : bikes) {
+                    pstmt.setString(1, bike.getSerialNumber());
+                    pstmt.setString(2, bike.getBrand());
+                    pstmt.setString(3, bike.getModel());
+                    pstmt.setString(4, bike.getReportedDate());
+                    pstmt.setString(5, bike.getSource());
+                    pstmt.setInt(6, bike.getReporterUserId());
+                    pstmt.setString(7, bike.getImagePath());
+                    pstmt.addBatch();
+                }
+
+                pstmt.executeBatch();
+                conn.commit();
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
             }
-
-            pstmt.executeBatch();
-
         } catch (SQLException e) {
-            System.err.println("Error batch inserting stolen bikes: " + e.getMessage());
+            System.err.println("Error refreshing API stolen bikes: " + e.getMessage());
         }
     }
 
@@ -246,7 +261,8 @@ public class DataBaseManager implements AuthService{
                         rs.getString("brand"),
                         rs.getString("model"),
                         rs.getString("type"),
-                        rs.getString("serialNumber")
+                        rs.getString("serialNumber"),
+                        rs.getString("imagePath")
                 );
                 userBikes.add(bike);
             }
@@ -412,7 +428,8 @@ public class DataBaseManager implements AuthService{
     //update
     //updates the whole bike
     public void updateBicikli(Bike bike) {
-        String sql = "UPDATE bikes SET brand = ?, model = ?, type = ?, serialNumber = ? WHERE id = ?";
+        String sql = "UPDATE bikes SET brand = ?, model = ?, type = ?, "
+        + "serialNumber = ?, imagePath = ? WHERE id = ?";
 
         try (Connection conn = DataBase.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -421,7 +438,8 @@ public class DataBaseManager implements AuthService{
             pstmt.setString(2, bike.getModel());
             pstmt.setString(3, bike.getType());
             pstmt.setString(4, bike.getSerialNumber());
-            pstmt.setInt(5, bike.getBicikliid());
+            pstmt.setString(5, bike.getImagePath());
+            pstmt.setInt(6, bike.getBicikliid());
             pstmt.executeUpdate();
 
         } catch (SQLException e) {

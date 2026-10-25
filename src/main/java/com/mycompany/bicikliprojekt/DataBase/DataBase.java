@@ -38,6 +38,7 @@ public class DataBase {
         + "model TEXT NOT NULL, "
         + "type TEXT NOT NULL, "
         + "serialNumber TEXT NOT NULL, "
+        + "imagePath TEXT,"
         + "FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE, "
         + "UNIQUE (userId, serialNumber)"
         + ");";
@@ -85,6 +86,20 @@ public class DataBase {
                 stmt.execute("ALTER TABLE users ADD COLUMN phoneNumber TEXT");
             }
             stmt.execute(createBikesTable);
+            boolean hasBikeImagePath = false;
+
+            try (ResultSet columns = stmt.executeQuery("PRAGMA table_info(bikes)")) {
+                while (columns.next()) {
+                    if ("imagePath".equalsIgnoreCase(columns.getString("name"))) {
+                        hasBikeImagePath = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasBikeImagePath) {
+                stmt.execute("ALTER TABLE bikes ADD COLUMN imagePath TEXT");
+            }
             stmt.execute(createForSaleBikesTable);
             stmt.execute(createStolenBikesTable);
             boolean hasReporterUserId = false;

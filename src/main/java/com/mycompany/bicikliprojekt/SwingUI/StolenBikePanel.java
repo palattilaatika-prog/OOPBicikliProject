@@ -12,6 +12,7 @@ import com.mycompany.bicikliprojekt.model.User;
 import com.mycompany.bicikliprojekt.SwingUI.components.StyledButton;
 import com.mycompany.bicikliprojekt.SwingUI.components.RoundedPanel;
 import com.mycompany.bicikliprojekt.SwingUI.components.BikeIcon;
+import com.mycompany.bicikliprojekt.services.StolenBikeService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -77,7 +78,19 @@ public class StolenBikePanel extends JPanel {
         reportButton.addActionListener(e -> openReportDialog());
 
         headerPanel.add(titlePanel, BorderLayout.CENTER);
-        headerPanel.add(reportButton, BorderLayout.EAST);
+        JPanel headerButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        headerButtons.setOpaque(false);
+
+        JButton refreshButton = new StyledButton(
+                "Frissítés",
+                new Color(235, 242, 237),
+                new Color(35, 125, 85)
+        );
+        refreshButton.addActionListener(e -> refreshApiBikes(refreshButton));
+
+        headerButtons.add(refreshButton);
+        headerButtons.add(reportButton);
+        headerPanel.add(headerButtons, BorderLayout.EAST);
 
         add(headerPanel, BorderLayout.NORTH);
 
@@ -217,6 +230,32 @@ public class StolenBikePanel extends JPanel {
                 JOptionPane.ERROR_MESSAGE
         );
         }
+    }
+    private void refreshApiBikes(JButton refreshButton) {
+        refreshButton.setEnabled(false);
+        refreshButton.setText("Frissítés...");
+
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() {
+                new StolenBikeService().syncStolenBikesFromApi();
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get();
+                    loadStolenBikes();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    showError("Nem sikerült frissíteni az API-adatokat.");
+                } finally {
+                    refreshButton.setText("Frissítés");
+                    refreshButton.setEnabled(true);
+                }
+            }
+        }.execute();
     }
 
     private void refreshCards() {

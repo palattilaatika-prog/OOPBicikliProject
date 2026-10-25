@@ -127,7 +127,7 @@ public class ProfilePanel extends JPanel {
                 bike.getModel(),
                 bike.getType(),
                 bike.getSerialNumber(),
-                null
+                bike.getImagePath()
         ));
     }
 }
@@ -181,7 +181,8 @@ public class ProfilePanel extends JPanel {
                 bike.brand,
                 bike.model,
                 bike.type,
-                bike.serialNumber
+                bike.serialNumber,
+                bike.imagePath
         );
 
         databaseManager.insertBicikli(newBike);
@@ -223,7 +224,8 @@ public class ProfilePanel extends JPanel {
             edited.brand,
             edited.model,
             edited.type,
-            edited.serialNumber
+            edited.serialNumber,
+            edited.imagePath
         );
 
         databaseManager.updateBicikli(updatedBike);
