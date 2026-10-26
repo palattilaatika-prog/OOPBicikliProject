@@ -12,6 +12,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.InputStream;
+import java.net.URLConnection;
 
 /**
  *
@@ -25,7 +27,17 @@ public class RssReader {
             // prepare XML
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(new URL(feedUrl).openStream());
+            URLConnection connection = new URL(feedUrl).openConnection();
+            connection.setUseCaches(false);
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(10000);
+            connection.setRequestProperty("Cache-Control", "no-cache");
+            connection.setRequestProperty("Pragma", "no-cache");
+
+            Document doc;
+            try (InputStream input = connection.getInputStream()) {
+                doc = builder.parse(input);
+            }
 
             doc.getDocumentElement().normalize();
 

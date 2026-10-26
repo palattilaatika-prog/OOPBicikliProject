@@ -94,7 +94,9 @@ public class NewsPanel extends JPanel {
             new SwingWorker<List<RssItem>, Void>() {
                 @Override
                 protected List<RssItem> doInBackground() {
-                    return RssReader.fetchRssNews(FEED_URL);
+                    return RssReader.fetchRssNews(
+                            FEED_URL + "?refresh=" + System.currentTimeMillis()
+                    );
                 }
 
                 @Override

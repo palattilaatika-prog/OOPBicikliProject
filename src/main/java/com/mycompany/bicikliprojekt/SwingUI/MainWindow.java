@@ -100,21 +100,5 @@ public class MainWindow extends JFrame{
         UIManager.put("FileChooser.listViewBackground", Color.WHITE);
     }
 
-    public static void main(String[] args) {
-       SwingUtilities.invokeLater(() -> {
-        applyDialogTheme();
-        DataBase.createTables();
-        DataBaseManager manager = new DataBaseManager();
-        manager.insertTestBikes();
-        manager.correctTestBikeImageExtensions();
-
-        LoginDialog loginDialog = new LoginDialog(null);
-
-        if (loginDialog.showDialog()) {
-            new MainWindow().setVisible(true);
-        } else {
-            System.exit(0);
-        }
-        });
-    }
+    
 }
