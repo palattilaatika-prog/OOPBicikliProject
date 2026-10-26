@@ -59,13 +59,27 @@ public class BikeCard extends RoundedPanel {
         JLabel imageLabel = new JLabel();
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         imageLabel.setPreferredSize(new Dimension(300, 190));
+        
+        File imageFile = imagePath == null ? null : new File(imagePath);
+            System.out.println(
+                    "Bicikli képút: " + imagePath
+                    + " | fájl létezik: "
+                    + (imageFile != null && imageFile.isFile())
+            );
 
-        if (imagePath != null && new File(imagePath).isFile()) {
+        if (imagePath != null
+                && !imagePath.isBlank()
+                && new File(imagePath).isFile()) {
             ImageIcon original = new ImageIcon(imagePath);
 
-            // Preserve the image aspect ratio instead of stretching it.
             int sourceWidth = original.getIconWidth();
             int sourceHeight = original.getIconHeight();
+
+            System.out.println(
+                    "Beolvasott képméret: "
+                    + sourceWidth + "x" + sourceHeight
+                    + " | " + imagePath
+            );
 
             if (sourceWidth > 0 && sourceHeight > 0) {
                 double scale = Math.min(
@@ -83,6 +97,8 @@ public class BikeCard extends RoundedPanel {
                 );
 
                 imageLabel.setIcon(new ImageIcon(scaled));
+            } else {
+                imageLabel.setIcon(new BikeIcon(180, 125));
             }
         } else {
             imageLabel.setIcon(new BikeIcon(180, 125));

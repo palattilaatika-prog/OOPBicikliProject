@@ -575,23 +575,23 @@ public class DataBaseManager implements AuthService{
     }
     public void insertTestBikes() {
         String[][] testBikes = {
-            {"tesztelek123@gmail.com", "Trek", "Marlin 7", "MTB", "TESTBIKE001", "bike01.png"},
-            {"tesztelek123@gmail.com", "Giant", "Trance 29", "MTB", "TESTBIKE002", "bike02.png"},
-            {"tesztelek123@gmail.com", "Specialized", "Allez", "Országúti", "TESTBIKE003", "bike03.png"},
-            {"tesztelek123@gmail.com", "Cannondale", "Topstone", "Gravel", "TESTBIKE004", "bike04.png"},
-            {"tesztelek123@gmail.com", "Cube", "Hyde", "Városi", "TESTBIKE005", "bike05.png"},
+            {"tesztelek123@gmail.com", "Trek", "Marlin 7", "MTB", "TESTBIKE001", "bike01.jpg"},
+            {"tesztelek123@gmail.com", "Giant", "Trance 29", "MTB", "TESTBIKE002", "bike02.jpg"},
+            {"tesztelek123@gmail.com", "Specialized", "Allez", "Országúti", "TESTBIKE003", "bike03.jpg"},
+            {"tesztelek123@gmail.com", "Cannondale", "Topstone", "Gravel", "TESTBIKE004", "bike04.jpg"},
+            {"tesztelek123@gmail.com", "Cube", "Hyde", "Városi", "TESTBIKE005", "bike05.jpg"},
 
-            {"teszterik123@gmail.com", "Elops", "540", "Városi", "TESTBIKE006", "bike06.png"},
-            {"teszterik123@gmail.com", "Mongoose", "Legion L20", "BMX", "TESTBIKE007", "bike07.png"},
-            {"teszterik123@gmail.com", "Trek", "FX 2", "Hibrid", "TESTBIKE008", "bike08.png"},
-            {"teszterik123@gmail.com", "Kona", "Sutra", "Túra", "TESTBIKE009", "bike09.png"},
-            {"teszterik123@gmail.com", "Giant", "Explore E+", "Elektromos", "TESTBIKE010", "bike10.png"},
+            {"teszterik123@gmail.com", "Elops", "540", "Városi", "TESTBIKE006", "bike06.jpg"},
+            {"teszterik123@gmail.com", "Mongoose", "Legion L20", "BMX", "TESTBIKE007", "bike07.jpg"},
+            {"teszterik123@gmail.com", "Trek", "FX 2", "Hibrid", "TESTBIKE008", "bike08.jpg"},
+            {"teszterik123@gmail.com", "Kona", "Sutra", "Túra", "TESTBIKE009", "bike09.jpg"},
+            {"teszterik123@gmail.com", "Giant", "Explore E+", "Elektromos", "TESTBIKE010", "bike10.jpg"},
 
-            {"tesztike123@gmail.com", "Btwin", "Rockrider ST100", "Gyerek MTB", "TESTBIKE011", "bike11.png"},
-            {"tesztike123@gmail.com", "Gazelle", "Esprit", "Városi", "TESTBIKE012", "bike12.png"},
-            {"tesztike123@gmail.com", "Specialized", "Fuse", "Trail MTB", "TESTBIKE013", "bike13.png"},
-            {"tesztike123@gmail.com", "Dahon", "Mariner D8", "Összecsukható", "TESTBIKE014", "bike14.png"},
-            {"tesztike123@gmail.com", "Electra", "Cruiser 1", "Cruiser", "TESTBIKE015", "bike15.png"}
+            {"tesztike123@gmail.com", "Btwin", "Rockrider ST100", "Gyerek MTB", "TESTBIKE011", "bike11.jpg"},
+            {"tesztike123@gmail.com", "Gazelle", "Esprit", "Városi", "TESTBIKE012", "bike12.jpg"},
+            {"tesztike123@gmail.com", "Specialized", "Fuse", "Trail MTB", "TESTBIKE013", "bike13.jpg"},
+            {"tesztike123@gmail.com", "Dahon", "Mariner D8", "Összecsukható", "TESTBIKE014", "bike14.jpg"},
+            {"tesztike123@gmail.com", "Electra", "Cruiser 1", "Cruiser", "TESTBIKE015", "bike15.jpg"}
         };
 
         String sql = "INSERT INTO bikes "
