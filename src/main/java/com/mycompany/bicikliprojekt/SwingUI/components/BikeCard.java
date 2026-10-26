@@ -35,7 +35,7 @@ public class BikeCard extends RoundedPanel {
     private static final Color DARK_TEXT = new Color(35, 45, 40);
     private static final Color SECONDARY_TEXT = new Color(110, 120, 115);
     private static final Color DANGER_COLOR = new Color(195, 65, 65);
-
+    // Build a bike card with its details, image, and action buttons.
     public BikeCard(
             String brand,
             String model,

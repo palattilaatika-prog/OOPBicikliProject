@@ -21,7 +21,7 @@ import javax.swing.plaf.basic.BasicButtonUI;
  * @author mcsab
  */
 public class StyledButton extends JButton {
-
+    // Configure the button's style and paint its rounded background.
     public StyledButton(String text, Color background, Color foreground) {
         super(text);
 

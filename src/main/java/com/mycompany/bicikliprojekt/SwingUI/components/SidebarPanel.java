@@ -46,7 +46,7 @@ public class SidebarPanel extends JPanel {
     private final JButton forSaleButton;
     private final JButton stolenButton;
     private final JButton newsButton;
-
+    // Build the sidebar with its logo, navigation buttons, and footer.
     public SidebarPanel(
             ActionListener profileAction,
             ActionListener forSaleAction,
@@ -121,7 +121,7 @@ public class SidebarPanel extends JPanel {
 
         add(footer, BorderLayout.SOUTH);
     }
-
+    // Create a styled navigation button and connect its action.
     private JButton createNavigationButton(
             Icon icon,
             String text,
@@ -155,13 +155,14 @@ public class SidebarPanel extends JPanel {
 
             return button;
         }
+    // Highlight the button for the active page.
     public void setActivePage(String page) {
         setButtonSelected(profileButton, "Profil".equals(page));
         setButtonSelected(forSaleButton, "Eladó kerékpárok".equals(page));
         setButtonSelected(stolenButton, "Ellopott kerékpárok".equals(page));
         setButtonSelected(newsButton, "Hírek".equals(page));
     }
-
+    // Update a navigation button's selected colors.
     private void setButtonSelected(
             JButton button, boolean selected) {
 
@@ -171,28 +172,29 @@ public class SidebarPanel extends JPanel {
         button.setForeground(
                 selected ? PRIMARY_GREEN : DARK_TEXT
         );
-    }
+    }   
+    // Define the icon types used by the sidebar.
     private enum MenuIconType {
     PROFILE, SALE, STOLEN, NEWS
 }
 
     private static class MenuIcon implements Icon {
         private final MenuIconType type;
-
+        // Store the icon type to draw.
         MenuIcon(MenuIconType type) {
             this.type = type;
         }
-
+        // Return the menu icon width.
         @Override
         public int getIconWidth() {
             return 24;
         }
-
+        // Return the menu icon height.
         @Override
         public int getIconHeight() {
             return 24;
         }
-
+        // Draw the menu icon for its assigned type.
         @Override
         public void paintIcon(
                 java.awt.Component component,

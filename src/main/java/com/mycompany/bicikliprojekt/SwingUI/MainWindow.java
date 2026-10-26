@@ -5,13 +5,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import com.mycompany.bicikliprojekt.DataBase.DataBase;
 import com.mycompany.bicikliprojekt.SwingUI.components.ContentPanel;
 import com.mycompany.bicikliprojekt.SwingUI.components.SidebarPanel;
-import com.mycompany.bicikliprojekt.DataBase.DataBaseManager;
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
@@ -24,7 +22,7 @@ import com.mycompany.bicikliprojekt.DataBase.DataBaseManager;
 public class MainWindow extends JFrame{
     private final ContentPanel contentPanel;
     private final SidebarPanel sidebarPanel;
-
+    // Build the main window and connect the navigation pages.
     public MainWindow() {
         DataBase.createTables();
         
@@ -50,12 +48,12 @@ public class MainWindow extends JFrame{
         setContentPane(root);
         showPage("Profil");
     }
-
+    // Display the selected page and update the sidebar.
     private void showPage(String pageName) {
         contentPanel.showPage(pageName);
         sidebarPanel.setActivePage(pageName);
     }
-    
+    // Set the colors and fonts used by Swing dialogs.
     private static void applyDialogTheme() {
         Color background = new Color(248, 250, 249);
         Color paleGreen = new Color(232, 241, 236);
@@ -99,6 +97,4 @@ public class MainWindow extends JFrame{
         UIManager.put("FileChooser.foreground", text);
         UIManager.put("FileChooser.listViewBackground", Color.WHITE);
     }
-
-    
 }

@@ -23,7 +23,7 @@ public class ContentPanel extends JPanel {
 
     private final CardLayout cardLayout;
     private final JPanel pages;
-
+    // Initialize and register the application's pages.
     public ContentPanel() {
         cardLayout = new CardLayout();
         pages = new JPanel(cardLayout);
@@ -36,17 +36,8 @@ public class ContentPanel extends JPanel {
         setLayout(new BorderLayout());
         add(pages, BorderLayout.CENTER);
     }
-
+    // Display the page matching the given name.
     public void showPage(String pageName) {
         cardLayout.show(pages, pageName);
-    }
-
-    private JPanel createPlaceholder(String title) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(
-                new JLabel(title, SwingConstants.CENTER),
-                BorderLayout.CENTER
-        );
-        return panel;
     }
 }

@@ -22,7 +22,7 @@ public class BikeIcon implements Icon {
     private final int width;
     private final int height;
     private final Image image;
-
+    // Load the bike image and set the icon size.
     public BikeIcon(int width, int height) {
         this.width = width;
         this.height = height;
@@ -32,17 +32,17 @@ public class BikeIcon implements Icon {
                 ? null
                 : new ImageIcon(imageUrl).getImage();
     }
-
+    // Return the configured icon width.
     @Override
     public int getIconWidth() {
         return width;
     }
-
+    // Return the configured icon height.
     @Override
     public int getIconHeight() {
         return height;
     }
-
+    // Draw the bike image centered and scaled inside the icon.
     @Override
     public void paintIcon(
             Component component,

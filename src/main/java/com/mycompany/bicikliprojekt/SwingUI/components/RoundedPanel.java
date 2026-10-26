@@ -16,12 +16,12 @@ import javax.swing.JPanel;
 public class RoundedPanel extends JPanel {
 
     private final int cornerRadius;
-
+    // Set the corner radius and make the panel transparent.
     public RoundedPanel(int cornerRadius) {
         this.cornerRadius = cornerRadius;
         setOpaque(false);
     }
-
+    // Paint the panel background with rounded corners.
     @Override
     protected void paintComponent(Graphics graphics) {
         Graphics2D g = (Graphics2D) graphics.create();
@@ -43,7 +43,7 @@ public class RoundedPanel extends JPanel {
         g.dispose();
         super.paintComponent(graphics);
     }
-
+    // Draw a rounded border around the panel.
     @Override
     protected void paintBorder(Graphics graphics) {
         Graphics2D g = (Graphics2D) graphics.create();

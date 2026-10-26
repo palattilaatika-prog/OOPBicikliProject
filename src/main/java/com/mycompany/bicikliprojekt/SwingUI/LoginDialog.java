@@ -33,7 +33,7 @@ public class LoginDialog extends JDialog {
     private final JPasswordField passwordField = new JPasswordField(20);
 
     private boolean loggedIn = false;
-
+    // Build the login and registration dialog.
     public LoginDialog(JFrame parent) {
         super(parent, "Bike Manager – Bejelentkezés", true);
 
@@ -80,12 +80,12 @@ public class LoginDialog extends JDialog {
         setResizable(false);
         setLocationRelativeTo(parent);
     }
-
+    // Show the dialog and return whether login succeeded.
     public boolean showDialog() {
         setVisible(true);
         return loggedIn;
     }
-
+    // Authenticate the user and start the session.
     private void login() {
         String email = emailField.getText().trim();
         String password = new String(passwordField.getPassword());
@@ -106,7 +106,7 @@ public class LoginDialog extends JDialog {
         loggedIn = true;
         dispose();
     }
-
+    // Validate the details and register a new user.
     private void register() {
         String email = emailField.getText().trim();
         String password = new String(passwordField.getPassword());
@@ -172,7 +172,7 @@ public class LoginDialog extends JDialog {
             showError(ex.getMessage());
         }
     }
-
+    // Show a warning message in the dialog.
     private void showError(String message) {
         JOptionPane.showMessageDialog(
                 this,
@@ -181,6 +181,7 @@ public class LoginDialog extends JDialog {
                 JOptionPane.WARNING_MESSAGE
         );
     }
+    // Apply the primary action button style.
     private void stylePrimaryButton(JButton button) {
         button.setBackground(new Color(31, 125, 88));
         button.setForeground(Color.WHITE);
@@ -190,7 +191,7 @@ public class LoginDialog extends JDialog {
         button.setOpaque(true);
         button.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     }
-
+    // Apply the secondary action button style.
     private void styleSecondaryButton(JButton button) {
         button.setBackground(new Color(232, 241, 236));
         button.setForeground(new Color(31, 125, 88));

@@ -5,15 +5,12 @@
 package com.mycompany.bicikliprojekt.SwingUI;
 
 import com.mycompany.bicikliprojekt.SwingUI.components.StyledButton;
-import com.mycompany.bicikliprojekt.SwingUI.components.RoundedPanel;
-import com.mycompany.bicikliprojekt.SwingUI.components.ScrollBar;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import com.mycompany.bicikliprojekt.DataBase.DataBaseManager;
@@ -38,7 +35,7 @@ public class ProfilePanel extends JPanel {
     private final JPanel cardsPanel;
     private final ArrayList<BikeItem> bikes = new ArrayList<>();
     private final DataBaseManager databaseManager = new DataBaseManager();
-    
+    // Build the profile page and load the user's bikes.
     public ProfilePanel(){
         setLayout(new BorderLayout(24, 24));
         setBackground(BACKGROUND_COLOR);
@@ -100,7 +97,7 @@ public class ProfilePanel extends JPanel {
         loadBikesFromDatabase();
         refreshCards();
     }
-    
+    // Load bikes owned by the signed-in user.
     private void loadBikesFromDatabase() {
     bikes.clear();
 
@@ -131,7 +128,7 @@ public class ProfilePanel extends JPanel {
         ));
     }
 }
-    
+    // Rebuild the profile cards after the bike list changes.
     private void refreshCards(){
         cardsPanel.removeAll();
         
@@ -143,8 +140,7 @@ public class ProfilePanel extends JPanel {
         cardsPanel.repaint();
     }
     
-    
-
+    // Create a card for one profile bike.
     private JPanel createBikeCard(BikeItem bike) {
         return new com.mycompany.bicikliprojekt.SwingUI.components.BikeCard(
                 bike.brand,
@@ -156,6 +152,7 @@ public class ProfilePanel extends JPanel {
                 () -> deleteBike(bike)
         );
     }
+    // Add a bike to the signed-in user's profile.
     private void addBike() {
         BikeItem bike = showBikeDialog(null);
 
@@ -197,8 +194,8 @@ public class ProfilePanel extends JPanel {
                 JOptionPane.INFORMATION_MESSAGE
         );
     }
-
     
+    // Update the selected bike's details.
     private void editBike(BikeItem bike) {
         BikeItem edited = showBikeDialog(bike);
 
@@ -247,7 +244,7 @@ public class ProfilePanel extends JPanel {
         );
     }
 
-
+    // Delete the selected bike after confirmation.
     private void deleteBike(BikeItem bike) {
         int answer = JOptionPane.showConfirmDialog(
             this,
@@ -266,6 +263,7 @@ public class ProfilePanel extends JPanel {
         loadBikesFromDatabase();
         refreshCards();
     }
+    // Collect bike details and an optional image from the user.
     private BikeItem showBikeDialog(BikeItem existing) {
         JTextField brandField = new JTextField(
                 existing == null ? "" : existing.brand);
@@ -394,7 +392,7 @@ public class ProfilePanel extends JPanel {
         return result[0];
     }
 
-    
+    // Add a styled label and text field to the form.
     private void addField(
         JPanel panel, String label, JTextField field) {
 
@@ -422,7 +420,7 @@ public class ProfilePanel extends JPanel {
         panel.add(Box.createVerticalStrut(10));
     }
 
-
+    // Check whether another profile bike uses this serial number.
     private boolean serialExists(String serial, BikeItem excluded) {
         for (BikeItem bike : bikes) {
             if (bike != excluded
@@ -433,7 +431,7 @@ public class ProfilePanel extends JPanel {
 
         return false;
     }
-
+    // Display a warning message to the user.
     private void showError(String message) {
         JOptionPane.showMessageDialog(
                 this,
@@ -442,7 +440,7 @@ public class ProfilePanel extends JPanel {
                 JOptionPane.WARNING_MESSAGE
         );
     }
-
+    // Store the data displayed for a profile bike.
     private static class BikeItem {
 
         private int id;
@@ -469,27 +467,27 @@ public class ProfilePanel extends JPanel {
     }
 }
 
-    // Saját rajzolt ikon, így nem kell hozzá külön képfájl.
+    
     private static class BikeIcon implements Icon {
 
         private final int width;
         private final int height;
-
+        // Set the size of the default bike icon.
         private BikeIcon(int width, int height) {
             this.width = width;
             this.height = height;
         }
-
+        // Return the configured icon width.
         @Override
         public int getIconWidth() {
             return width;
         }
-
+        // Return the configured icon height.
         @Override
         public int getIconHeight() {
             return height;
         }
-
+        // Draw the default bike icon.
         @Override
         public void paintIcon(
                 Component component,

@@ -26,23 +26,23 @@ public class ScrollBar extends BasicScrollBarUI {
 
     private static final Color THUMB_HOVER_COLOR =
             new Color(135, 165, 150);
-
+    // Set the scrollbar track and thumb colors.
     @Override
     protected void configureScrollBarColors() {
         trackColor = TRACK_COLOR;
         thumbColor = THUMB_COLOR;
     }
-
+    // Set the minimum size of the scrollbar thumb.
     @Override
     protected Dimension getMinimumThumbSize() {
         return new Dimension(8, 35);
     }
-
+    // Set the maximum size of the scrollbar thumb.
     @Override
     protected Dimension getMaximumThumbSize() {
         return new Dimension(8, Integer.MAX_VALUE);
     }
-
+    // Paint the scrollbar track.
     @Override
     protected void paintTrack(
             Graphics g, javax.swing.JComponent c,
@@ -60,7 +60,7 @@ public class ScrollBar extends BasicScrollBarUI {
         );
         g2.dispose();
     }
-
+    // Paint the scrollbar thumb with rounded corners.
     @Override
     protected void paintThumb(
             Graphics g, javax.swing.JComponent c,
@@ -97,17 +97,17 @@ public class ScrollBar extends BasicScrollBarUI {
         g2.fillRoundRect(x, y, width, height, 8, 8);
         g2.dispose();
     }
-
+    // Hide the scrollbar's decrease button.
     @Override
     protected JButton createDecreaseButton(int orientation) {
         return invisibleButton();
     }
-
+    // Hide the scrollbar's increase button.
     @Override
     protected JButton createIncreaseButton(int orientation) {
         return invisibleButton();
     }
-
+    // Create a button hidden from the scrollbar.
     private JButton invisibleButton() {
         JButton button = new JButton();
         button.setPreferredSize(new Dimension(0, 0));

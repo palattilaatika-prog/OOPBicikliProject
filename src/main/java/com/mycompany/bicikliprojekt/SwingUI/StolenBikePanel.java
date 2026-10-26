@@ -27,7 +27,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.plaf.basic.BasicScrollBarUI;
 
 /**
  *
@@ -42,7 +41,7 @@ public class StolenBikePanel extends JPanel {
     private final JLabel resultCountLabel = new JLabel();
 
     private List<StolenBike> stolenBikes = new ArrayList<>();
-
+    // Build the stolen-bike page and load its reports.
     public StolenBikePanel() {
         setLayout(new BorderLayout(20, 20));
         setBorder(new EmptyBorder(24, 28, 24, 28));
@@ -131,32 +130,35 @@ public class StolenBikePanel extends JPanel {
         scrollPane.setOpaque(false);
 
         scrollPane.getVerticalScrollBar().setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
+            // Set the scrollbar colors.
             @Override
             protected void configureScrollBarColors() {
                 thumbColor = new Color(137, 168, 154);
                 trackColor = new Color(240, 245, 242);
             }
-
+            // Create the scrollbar's decrease arrow button.
             @Override
             protected JButton createDecreaseButton(int orientation) {
                 return new JButton() {
+                    // Hide the scrollbar arrow button.
                     @Override
                     public Dimension getPreferredSize() {
                         return new Dimension(0, 0);
                     }
                 };
             }
-
+            // Create the scrollbar's increase arrow button.
             @Override
             protected JButton createIncreaseButton(int orientation) {
                 return new JButton() {
+                    // Hide the scrollbar arrow button.
                     @Override
                     public Dimension getPreferredSize() {
                         return new Dimension(0, 0);
                     }
                 };
             }
-
+            // Paint the scrollbar track.
             @Override
             protected void paintTrack(Graphics graphics, JComponent component, Rectangle bounds) {
                 Graphics2D g = (Graphics2D) graphics.create();
@@ -164,7 +166,7 @@ public class StolenBikePanel extends JPanel {
                 g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
                 g.dispose();
             }
-
+            // Paint the rounded scrollbar thumb.
             @Override
             protected void paintThumb(Graphics graphics, JComponent component, Rectangle bounds) {
                 if (bounds.isEmpty() || !scrollbar.isEnabled()) {
@@ -202,7 +204,7 @@ public class StolenBikePanel extends JPanel {
 
         loadStolenBikes();
     }
-
+    // Load stolen-bike reports from the database.
     private void loadStolenBikes() {
         try {
             List<StolenBike> result = databaseManager.getAllLopottBicikli();
@@ -231,17 +233,19 @@ public class StolenBikePanel extends JPanel {
         );
         }
     }
+    // Refresh API reports without blocking the UI.
     private void refreshApiBikes(JButton refreshButton) {
         refreshButton.setEnabled(false);
         refreshButton.setText("Frissítés...");
 
         new SwingWorker<Void, Void>() {
+            // Fetch API reports in the background.
             @Override
             protected Void doInBackground() {
                 new StolenBikeService().syncStolenBikesFromApi();
                 return null;
             }
-
+            // Update the page after the API request finishes.
             @Override
             protected void done() {
                 try {
@@ -257,7 +261,7 @@ public class StolenBikePanel extends JPanel {
             }
         }.execute();
     }
-
+    // Filter reports and rebuild the visible cards.
     private void refreshCards() {
         cardsPanel.removeAll();
 
@@ -324,13 +328,14 @@ public class StolenBikePanel extends JPanel {
         cardsPanel.revalidate();
         cardsPanel.repaint();
     }
+    // Check whether the signed-in user reported this bike.
     private boolean isReporter(StolenBike bike) {
         User currentUser = SessionManager.getCurrentUser();
 
         return currentUser != null
                 && currentUser.getUId() == bike.getReporterUserId();
     }
-
+    // Create a card for one stolen-bike report.
     private JPanel createBikeCard(StolenBike bike) {
         JPanel card = new RoundedPanel(18);
         card.setLayout(new BorderLayout(0, 10));
@@ -435,7 +440,7 @@ public class StolenBikePanel extends JPanel {
 
         return card;
     }
-
+    // Display the selected bike's report details.
     private void showBikeDetails(StolenBike bike) {
         String message =
                 "Márka: " + safe(bike.getBrand()) + "\n"
@@ -451,7 +456,7 @@ public class StolenBikePanel extends JPanel {
                 JOptionPane.INFORMATION_MESSAGE
         );
     }
-    
+    // Delete the report if it belongs to the signed-in user.
     private void deleteStolenBike(StolenBike bike) {
         if (!isReporter(bike)) {
             showError("Csak a saját bejelentésedet törölheted.");
@@ -478,7 +483,7 @@ public class StolenBikePanel extends JPanel {
 
         loadStolenBikes();
     }
-
+    // Show the form for reporting a stolen bike.
     private void openReportDialog() {
         User currentUser = SessionManager.getCurrentUser();
 
@@ -625,7 +630,7 @@ public class StolenBikePanel extends JPanel {
         imagePanel.add(chooseImageButton, BorderLayout.EAST);
 
         addFormRow(form, gbc, row++, "Kerékpár képe:", imagePanel);
-
+        // Fill the form with the selected profile bike's details.
         Runnable fillSelectedBike = () -> {
             if (!ownBikeButton.isSelected()) {
                 return;
@@ -640,7 +645,7 @@ public class StolenBikePanel extends JPanel {
                 serialField.setText(safe(bike.getSerialNumber()));
             }
         };
-
+        // Enable the fields required for the selected report mode.
         Runnable updateMode = () -> {
             boolean manual = manualBikeButton.isSelected();
 
@@ -785,7 +790,7 @@ public class StolenBikePanel extends JPanel {
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
-
+    // Add a labeled component to the report form.
     private void addFormRow(
             JPanel panel,
             GridBagConstraints gbc,
@@ -805,11 +810,11 @@ public class StolenBikePanel extends JPanel {
 
         panel.add(component, gbc);
     }
-
+    // Replace a missing text value with an empty string.
     private String safe(String value) {
         return value == null ? "" : value;
     }
-
+    // Display an error message to the user.
     private void showError(String message) {
         JOptionPane.showMessageDialog(
                 this,

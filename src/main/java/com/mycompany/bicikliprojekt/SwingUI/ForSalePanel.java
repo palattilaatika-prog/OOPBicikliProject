@@ -18,8 +18,6 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.io.File;
 import java.util.Locale;
@@ -34,7 +32,7 @@ public class ForSalePanel extends JPanel {
     private final ArrayList<ForSaleBike> bikes = new ArrayList<>();
     private final JTextField searchField = new JTextField(24);
     private final JLabel resultCountLabel = new JLabel();
-
+    // Build the sale listings page and load its data.
     public ForSalePanel() {
         setLayout(new BorderLayout(15, 15));
         setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -95,10 +93,11 @@ public class ForSalePanel extends JPanel {
 
         loadBikes();
     }
+    // Replace null text values with an empty string.
     private String safe(String value) {
         return value == null ? "" : value;
     }
-
+    // Filter the listings and rebuild the visible cards.
     private void refreshCards() {
         cardsPanel.removeAll();
 
@@ -146,7 +145,7 @@ public class ForSalePanel extends JPanel {
         cardsPanel.revalidate();
         cardsPanel.repaint();
     }
-
+    // Load all sale listings from the database.
     private void loadBikes() {
     try {
         bikes.clear();
@@ -157,14 +156,14 @@ public class ForSalePanel extends JPanel {
                 + ex.getMessage());
     }
     }
-    
+    // Check whether the signed-in user owns this listing.
     private boolean isOwner(ForSaleBike bike) {
         User currentUser = SessionManager.getCurrentUser();
 
         return currentUser != null
                 && currentUser.getUId() == bike.getUserId();
     }
-
+    // Create a card displaying one sale listing.
     private JPanel createBikeCard(ForSaleBike bike) {
         JPanel card = new JPanel(new BorderLayout(8, 8));
         card.setBackground(Color.WHITE);
@@ -273,7 +272,7 @@ public class ForSalePanel extends JPanel {
 
         return card;
     }
-
+    // Create a listing from one of the user's bikes.
     private void addBike() {
         User currentUser = SessionManager.getCurrentUser();
 
@@ -295,6 +294,7 @@ public class ForSalePanel extends JPanel {
         bikeComboBox.setMaximumRowCount(8);
 
         bikeComboBox.setRenderer(new DefaultListCellRenderer() {
+            // Format a bike option in the selection list.
             @Override
             public Component getListCellRendererComponent(
                     JList<?> list,
@@ -384,7 +384,7 @@ public class ForSalePanel extends JPanel {
                     + ex.getMessage());
         }
     }
-
+    // Update a listing owned by the signed-in user.
     private void editBike(ForSaleBike bike) {
         if (!isOwner(bike)) {
             showError("Csak a saját hirdetésedet módosíthatod.");
@@ -411,7 +411,7 @@ public class ForSalePanel extends JPanel {
                     + ex.getMessage());
         }
         }
-
+    // Delete a listing owned by the signed-in user.
     private void deleteBike(ForSaleBike bike) {
         if (!isOwner(bike)) {
             showError("Csak a saját hirdetésedet törölheted.");
@@ -437,7 +437,7 @@ public class ForSalePanel extends JPanel {
                     + ex.getMessage());
         }
     }
-
+    // Show the form for adding or editing a sale listing.
     private ListingDetails showBikeDialog(ForSaleBike existing, Bike selectedBike) {
         
         JTextField brandField = new JTextField(
@@ -669,7 +669,7 @@ public class ForSalePanel extends JPanel {
             condition, price, description, selectedImage[0]
         );
     }
-
+    // Display a warning message to the user.
     private void showError(String message) {
         JOptionPane.showMessageDialog(
                 this,
@@ -684,7 +684,7 @@ public class ForSalePanel extends JPanel {
     private final double price;
     private final String description;
     private final String imagePath;
-
+        // Store the values entered in the listing form.
         private ListingDetails(
                 String condition,
                 double price,

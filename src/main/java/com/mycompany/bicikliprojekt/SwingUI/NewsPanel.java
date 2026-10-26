@@ -31,7 +31,7 @@ public class NewsPanel extends JPanel {
             new Color(35, 125, 85),
             Color.WHITE
     );
-
+        // Build the news page and start loading the RSS feed.
         public NewsPanel() {
             setLayout(new BorderLayout(18, 18));
             setBorder(new EmptyBorder(24, 28, 24, 28));
@@ -83,7 +83,7 @@ public class NewsPanel extends JPanel {
             refreshButton.addActionListener(e -> loadNews());
             loadNews();
         }
-
+        // Fetch RSS items in the background and refresh the news cards.
         private void loadNews() {
             refreshButton.setEnabled(false);
             statusLabel.setText("Hírek betöltése...");
@@ -92,13 +92,14 @@ public class NewsPanel extends JPanel {
             cardsPanel.repaint();
 
             new SwingWorker<List<RssItem>, Void>() {
+                // Download the RSS items without blocking the UI.
                 @Override
                 protected List<RssItem> doInBackground() {
                     return RssReader.fetchRssNews(
                             FEED_URL + "?refresh=" + System.currentTimeMillis()
                     );
                 }
-
+                // Display the RSS results after the background task finishes.
                 @Override
                 protected void done() {
                     try {
@@ -132,7 +133,7 @@ public class NewsPanel extends JPanel {
                 }
             }.execute();
         }
-
+        // Create a card for one news item.
         private JPanel createNewsCard(RssItem item) {
             JPanel card = new RoundedPanel(18);
             card.setLayout(new BorderLayout(0, 10));
@@ -185,7 +186,7 @@ public class NewsPanel extends JPanel {
 
             return card;
         }
-
+        // Open the selected article in the browser.
         private void openArticle(String link) {
             try {
                 if (link == null || link.isBlank()) {
@@ -202,7 +203,7 @@ public class NewsPanel extends JPanel {
                 );
             }
         }
-
+        // Replace a missing text value with an empty string.
         private String safe(String value) {
             return value == null ? "" : value;
         }
